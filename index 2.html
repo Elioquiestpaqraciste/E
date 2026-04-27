@@ -1,0 +1,1331 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QCM Santé Publique - Hub & Examen</title>
+
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  <style>
+    :root {
+      /* Couleurs par défaut (Light) */
+      --bg: #f3f4f6; --surface: rgba(255, 255, 255, 0.95); --surface-blur: blur(16px);
+      --text: #1f2937; --text-muted: #6b7280;
+      --border: rgba(31, 41, 55, 0.15); --shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      
+      /* Indigo (Défaut) */
+      --primary: #4f46e5; --primary-hover: #4338ca; --primary-light: rgba(79, 70, 229, 0.1);
+      
+      --success: #10b981; --success-light: rgba(16, 185, 129, 0.1);
+      --danger: #ef4444; --danger-light: rgba(239, 68, 68, 0.1);
+      --exam: #8b5cf6; --exam-light: rgba(139, 92, 246, 0.15);
+      --radius: 20px; --radius-sm: 12px;
+      --font-sans: system-ui, -apple-system, sans-serif;
+    }
+
+    /* --- PALETTES DE COULEURS --- */
+    [data-color="rose"] { --primary: #e11d48; --primary-hover: #be123c; --primary-light: rgba(225, 29, 72, 0.1); }
+    [data-color="ocean"] { --primary: #0891b2; --primary-hover: #0e7490; --primary-light: rgba(8, 145, 178, 0.1); }
+    [data-color="violet"] { --primary: #9333ea; --primary-hover: #7e22ce; --primary-light: rgba(147, 51, 234, 0.1); }
+    [data-color="sunset"] { --primary: #ea580c; --primary-hover: #c2410c; --primary-light: rgba(234, 88, 12, 0.1); }
+    [data-color="emerald"] { --primary: #059669; --primary-hover: #047857; --primary-light: rgba(5, 150, 105, 0.1); }
+    [data-color="amber"] { --primary: #d97706; --primary-hover: #b45309; --primary-light: rgba(217, 119, 6, 0.1); }
+    [data-color="teal"] { --primary: #0d9488; --primary-hover: #0f766e; --primary-light: rgba(13, 148, 136, 0.1); }
+    [data-color="fuchsia"] { --primary: #c026d3; --primary-hover: #a21caf; --primary-light: rgba(192, 38, 211, 0.1); }
+    [data-color="slate"] { --primary: #475569; --primary-hover: #334155; --primary-light: rgba(71, 85, 105, 0.1); }
+
+    [data-theme="dark"] {
+      --bg: #111827; --surface: rgba(31, 41, 55, 0.9);
+      --text: #f9fafb; --text-muted: #9ca3af;
+      --border: rgba(255, 255, 255, 0.1); --shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+      --primary: #6366f1; --primary-hover: #818cf8; --primary-light: rgba(99, 102, 241, 0.15);
+    }
+[data-theme="dark"][data-color="rose"] { --primary: #f43f5e; --primary-hover: #fb7185; --primary-light: rgba(244, 63, 94, 0.15); }
+    [data-theme="dark"][data-color="ocean"] { --primary: #22d3ee; --primary-hover: #67e8f9; --primary-light: rgba(34, 211, 238, 0.15); }
+    [data-theme="dark"][data-color="violet"] { --primary: #a855f7; --primary-hover: #c084fc; --primary-light: rgba(168, 85, 247, 0.15); }
+    [data-theme="dark"][data-color="sunset"] { --primary: #fb923c; --primary-hover: #fdba74; --primary-light: rgba(251, 146, 60, 0.15); }
+    [data-theme="dark"][data-color="emerald"] { --primary: #34d399; --primary-hover: #6ee7b7; --primary-light: rgba(52, 211, 153, 0.15); }
+    [data-theme="dark"][data-color="amber"] { --primary: #fbbf24; --primary-hover: #fcd34d; --primary-light: rgba(251, 191, 36, 0.15); }
+    [data-theme="dark"][data-color="teal"] { --primary: #2dd4bf; --primary-hover: #5eead4; --primary-light: rgba(45, 212, 191, 0.15); }
+    [data-theme="dark"][data-color="fuchsia"] { --primary: #e879f9; --primary-hover: #f0abfc; --primary-light: rgba(232, 121, 249, 0.15); }
+    [data-theme="dark"][data-color="slate"] { --primary: #94a3b8; --primary-hover: #cbd5e1; --primary-light: rgba(148, 163, 184, 0.15); }
+
+    /* --- BASE --- */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; width: 100%; font-family: var(--font-sans); color: var(--text); background: var(--bg); transition: background 0.4s ease, color 0.4s ease; overflow: hidden; }
+
+    #progressBar { position: fixed; top: 0; left: 0; height: 5px; width: 0%; background: linear-gradient(90deg, var(--primary), var(--primary-hover)); transition: width 0.3s; z-index: 9999; }
+
+    /* --- LAYOUT PRINCIPAL --- */
+    .app-layout { display: flex; width: 100vw; height: 100vh; }
+
+    /* --- SIDEBAR (PANNEAU LATÉRAL) --- */
+    .app-sidebar {
+      display: none; /* Caché par défaut */
+      width: 320px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      flex-direction: column;
+      flex-shrink: 0;
+      z-index: 50;
+      transition: 0.3s ease;
+    }
+    .app-sidebar.active { display: flex; }
+
+    .sidebar-header {
+      padding: 25px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+    }
+    .sidebar-header h1 { font-size: 1.3rem; font-weight: 800; color: var(--primary); margin-bottom: 5px; }
+    .sidebar-header p { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px;}
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+    .sidebar-section h4 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+
+    /* TRACKER DANS LA SIDEBAR (PENDANT LE QUIZ) */
+    .tracker-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+      gap: 10px;
+    }
+    .q-dot { width: 100%; aspect-ratio: 1; border-radius: 10px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.95rem; color: var(--text-muted); background: var(--bg); transition: 0.3s; cursor: pointer; }
+    .q-dot:hover { border-color: var(--primary); }
+    .q-dot.current { border-color: var(--primary); box-shadow: 0 0 15px var(--primary-light); transform: scale(1.1); z-index: 2; }
+    .q-dot.answered { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
+    .q-dot.correct { border-color: var(--success); background: var(--success); color: white; cursor: default;}
+    .q-dot.incorrect { border-color: var(--danger); background: var(--danger); color: white; cursor: default;}
+
+    /* --- ZONE PRINCIPALE --- */
+    .app-main {
+      flex: 1;
+      height: 100vh;
+      overflow-y: auto;
+      background-image: radial-gradient(at 0% 0%, var(--primary-light) 0px, transparent 50%), radial-gradient(at 100% 100%, var(--success-light) 0px, transparent 50%);
+      background-attachment: fixed;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .app-header {
+      padding: 20px 30px;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 15px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: transparent;
+    }
+    .header-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap;}
+    
+    .badge { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: var(--surface); border: 2px solid var(--border); border-radius: 50px; font-size: 1rem; font-weight: 800; box-shadow: var(--shadow); }
+    .badge span.lbl { color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; }
+    .timer-badge { cursor: pointer; user-select: none; min-width: 90px; justify-content: center; }
+    .timer-danger { border-color: var(--danger) !important; color: var(--danger) !important; animation: pulse 1s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 var(--danger-light); } 70% { box-shadow: 0 0 0 10px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+
+    button.icon-btn { background: var(--surface); border: 2px solid var(--border); border-radius: 50%; width: 45px; height: 45px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; transition: 0.2s; color: var(--text); box-shadow: var(--shadow); }
+    button.icon-btn:hover { background: var(--primary-light); border-color: var(--primary); transform: scale(1.05); }
+
+    /* CONTAINER DES SCREENS */
+    .container { width: 100%; max-width: 900px; margin: 0 auto; padding: 0 30px 50px; display: flex; flex-direction: column; gap: 20px; }
+
+    .screen { background: var(--surface); backdrop-filter: var(--surface-blur); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 40px; display: none; animation: fadeIn 0.4s ease; }
+    .screen.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* HUB (ACCUEIL) */
+    .global-actions { display: flex; gap: 15px; justify-content: center; margin-top: 25px; flex-wrap: wrap; }
+    .hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 25px; }
+    .hub-card {
+      background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 25px 20px; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; text-align: center;
+    }
+    .hub-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: var(--shadow); background: var(--surface); }
+    .hub-icon { font-size: 3rem; margin-bottom: 15px; }
+    .hub-title { font-weight: 700; font-size: 1.05rem; margin-bottom: 12px; color: var(--text); line-height: 1.3;}
+    .hub-meta { font-size: 0.85rem; font-weight: 600; color: var(--primary); background: var(--primary-light); padding: 6px 14px; border-radius: 20px; }
+
+    /* DASHBOARD & HISTORY */
+    .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 25px 0; }
+    .stat-card { background: var(--bg); padding: 20px; border-radius: var(--radius-sm); border: 1px solid var(--border); text-align: center; }
+    .stat-card h3 { color: var(--text-muted); font-size: 0.9rem; text-transform: uppercase; margin-bottom: 10px; }
+    .stat-card .value { font-size: 2.5rem; font-weight: 800; color: var(--primary); }
+
+    .history-section { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); }
+    .history-list { max-height: 200px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-top: 15px; padding-right: 5px; }
+    .history-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.95rem; flex-wrap: wrap; gap: 10px;}
+    .history-item .h-date { color: var(--text-muted); font-size: 0.85rem; display: flex; align-items: center; gap: 5px;}
+    .history-item .h-score { font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 5px;}
+    .history-item .h-time { font-family: monospace; opacity: 0.8; font-size: 0.9rem; background: var(--surface); padding: 4px 8px; border-radius: 8px;}
+
+    .settings-group { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 15px; }
+    select.custom-select { appearance: none; background: var(--surface); color: var(--text); border: 2px solid var(--border); padding: 12px 20px; border-radius: var(--radius-sm); font-size: 1rem; font-weight: 600; cursor: pointer; min-width: 250px; text-align: center; }
+    select.custom-select:hover, select.custom-select:focus { border-color: var(--primary); outline: none; }
+
+    /* QUIZ ELEMENTS */
+    .q-source { font-size: 0.85rem; color: var(--primary); font-weight: 700; text-transform: uppercase; margin-bottom: 8px; display: inline-block; padding: 4px 10px; background: var(--primary-light); border-radius: 20px; transition: all 0.3s; }
+    .q-source.exam-mode { background: var(--primary-light); color: var(--primary); }
+    .q-text { font-size: 1.2rem; font-weight: 700; line-height: 1.4; white-space: pre-wrap; margin-bottom: 20px;}
+
+    .options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 25px; }
+    .option-label { display: flex; align-items: flex-start; gap: 15px; padding: 16px; border: 2px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: 0.2s; background: var(--bg); }
+    .option-label:hover { border-color: var(--primary); background: var(--primary-light); transform: translateX(4px); }
+    .option-label.selected { border-color: var(--primary); background: var(--primary-light); }
+    .checkbox-box { width: 22px; height: 22px; border: 2px solid var(--text-muted); border-radius: 6px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; background: var(--surface); }
+    .option-label.selected .checkbox-box { border-color: var(--primary); background: var(--primary); }
+    .option-label.selected .checkbox-box::after { content: "✓"; color: white; font-size: 14px; font-weight: bold; }
+    .option-text { font-size: 1.05rem; line-height: 1.4; color: var(--text); }
+
+    .option-label.correct { border-color: var(--success) !important; background: var(--success-light) !important; }
+    .option-label.correct .checkbox-box { border-color: var(--success) !important; background: var(--success) !important; }
+    .option-label.incorrect { border-color: var(--danger) !important; background: var(--danger-light) !important; }
+    .option-label.incorrect .checkbox-box { border-color: var(--danger) !important; background: var(--danger) !important; content: "✗"; }
+
+    .actions-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-top: 1px solid var(--border); padding-top: 20px; }
+    .btn { padding: 12px 24px; border-radius: 50px; font-weight: 700; font-size: 1rem; border: none; cursor: pointer; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display:inline-flex; align-items:center; gap:8px; justify-content: center;}
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 6px 20px var(--primary-light); }
+    .btn-primary:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; transform: none; box-shadow: none; }
+    
+    .btn-exam { background: linear-gradient(135deg, var(--primary), var(--primary-hover)); color: white; }
+    .btn-exam:hover { box-shadow: 0 8px 25px var(--primary-light); transform: translateY(-2px); }
+    
+    .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text); box-shadow: none;}
+    .btn-outline:hover { background: var(--border); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { background: #dc2626; box-shadow: 0 6px 20px var(--danger-light); transform: translateY(-2px); }
+
+    .explanation { margin-top: 20px; padding: 20px; border-radius: var(--radius-sm); border-left: 5px solid var(--primary); background: var(--bg); display: none; }
+    .explanation h4 { display: flex; align-items: center; gap: 8px; font-size: 1.1rem; margin-bottom: 10px; text-transform: uppercase; }
+    .explanation p { font-size: 1rem; line-height: 1.5; white-space: pre-wrap; }
+    
+    /* WRONG ITEMS (Correction) */
+    .wrong-list { margin-top: 20px; max-height: 55vh; overflow-y: auto; text-align: left; padding-right: 10px; display: flex; flex-direction: column; gap: 15px; }
+    .wrong-item { background: var(--bg); border: 1px solid var(--border); padding: 20px; border-radius: var(--radius-sm); }
+    .wrong-item h5 { color: var(--text-muted); margin-bottom: 10px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;}
+    .wrong-item .w-q { font-weight: 700; margin-bottom: 15px; font-size: 1.1rem; line-height: 1.4;}
+    .wrong-item .w-picks { color: var(--danger); font-size: 0.95rem; margin-bottom: 15px; padding-left: 10px; border-left: 3px solid var(--danger); line-height: 1.4;}
+    .wrong-item .w-exp { font-size: 0.95rem; line-height: 1.5; color: var(--success); background: var(--success-light); padding: 15px; border-radius: 8px; white-space: pre-wrap;}
+    ::-webkit-scrollbar { width: 8px; height: 8px; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+    .text-center { text-align: center; }
+
+    /* MOBILE RESPONSIVE */
+    @media (max-width: 900px) {
+      .app-layout { flex-direction: column; }
+      .app-sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); }
+      .tracker-grid { display: flex; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 10px; }
+      .tracker-grid .q-dot { width: 45px; height: 45px; flex-shrink: 0; }
+      .app-main { height: auto; flex: 1; }
+      .container { padding: 0 15px 30px; }
+      .screen { padding: 25px; }
+      .actions-bar { flex-direction: column; align-items: stretch; } 
+      .actions-bar .btn { width: 100%; } 
+    }
+  </style>
+</head>
+
+<body>
+<input type="file" id="jsonUpload" accept=".json" style="display:none;" />
+<div id="progressBar"></div>
+
+<div class="app-layout">
+  
+  <aside class="app-sidebar" id="appSidebar">
+    <div class="sidebar-header">
+      <h1 id="mainTitle">Progression</h1>
+      <p id="subTitle">Session en cours</p>
+    </div>
+
+    <div id="sidebarTracker" class="sidebar-content">
+      <div class="sidebar-section">
+        <div class="tracker-grid" id="quizSidebar"></div>
+        <button class="btn btn-outline" id="quitQuizBtn" style="width: 100%; margin-top: 25px;">🚪 Quitter le QCM</button>
+      </div>
+    </div>
+  </aside>
+
+  <main class="app-main">
+    <header class="app-header">
+      <div class="header-controls">
+        <div class="badge timer-badge" id="timerBadge" style="display:none;" title="Chronomètre">⏱️ <span id="timerText">90s</span></div>
+        <div class="badge" id="scoreBadge" style="display:none;"><span class="lbl">Score</span><strong id="liveScore">0</strong>/<span id="liveTotal">0</span></div>
+        <button class="icon-btn" id="colorBtn" title="Changer la couleur">🎨</button>
+        <button class="icon-btn" id="themeBtn" title="Mode Sombre/Clair">🌓</button>
+      </div>
+    </header>
+
+    <div class="container">
+      <section class="screen active" id="welcomeScreen">
+        <div class="text-center" style="margin-top: 2vh;">
+          <div style="font-size: 3.5rem; margin-bottom: 15px;">📚</div>
+          <h2 style="font-size: 2.2rem; color: var(--primary);">Hub de Révision</h2>
+          <p class="text-muted mt-4" style="max-width: 550px; margin: 0 auto; line-height: 1.6; font-size: 1.1rem;">
+            Sélectionne un chapitre pour t'entraîner de manière ciblée, ou lance directement une session globale pour évaluer ton niveau.
+          </p>
+        </div>
+
+        <div class="global-actions">
+          <button class="btn btn-exam" id="startExamBtn" style="font-size: 1.1rem; padding: 15px 30px;">🎓 Lancer un Examen Blanc</button>
+          <button class="btn btn-danger" id="startGlobalRetryBtn" style="font-size: 1.1rem; padding: 15px 30px;">❌ Réviser Mes Erreurs (<span id="globalMistakesCount">0</span>)</button>
+          <button class="btn btn-outline" id="importJsonBtn" style="font-size: 1.05rem;">📁 Importer QCM</button>
+        </div>
+
+        <h3 style="margin-top: 45px; border-bottom: 2px solid var(--border); padding-bottom: 10px; color: var(--text-muted); text-transform: uppercase; font-size: 0.95rem; letter-spacing: 1px;">Entraînement par chapitre</h3>
+        <div class="hub-grid" id="hubGrid"></div>
+      </section>
+
+      <section class="screen" id="dashboardScreen">
+        <button class="btn btn-outline" id="backToHubBtn" style="margin-bottom: 20px; font-size: 0.9rem; padding: 8px 16px;">🔙 Retour au Hub</button>
+        <div class="text-center">
+          <h2 id="dashCourseTitle">Titre du cours</h2>
+          <p class="text-muted mt-4">Prépare-toi bien. Voici tes statistiques sur ce chapitre :</p>
+        </div>
+        
+        <div class="dashboard-grid">
+          <div class="stat-card"><h3>Parties jouées</h3><div class="value" id="statGames">0</div></div>
+          <div class="stat-card"><h3>Note Moyenne</h3><div class="value" id="statAvg">--/20</div></div>
+          <div class="stat-card"><h3>Dernière Note</h3><div class="value" id="statLast">--/20</div></div>
+        </div>
+        
+        <div class="settings-group">
+          <label for="orderSelect" style="font-weight: 600; color: var(--text-muted);">Ordre des questions</label>
+          <select id="orderSelect" class="custom-select">
+            <option value="chrono">⏳ Ordre du fichier</option>
+            <option value="random">🔀 Aléatoire (Recommandé)</option>
+          </select>
+        </div>
+        
+        <div style="display:flex; justify-content:center; gap:15px; flex-wrap:wrap; margin-top: 25px;">
+          <button class="btn btn-outline" id="resetStatsBtn">🗑️ Réinitialiser</button>
+          <button class="btn btn-primary" id="startFullBtn" style="font-size:1.1rem; padding: 15px 30px;">▶ Démarrer le QCM</button>
+        </div>
+
+        <div class="history-section" id="historySection" style="display:none;">
+          <h3 class="text-center" style="color:var(--text-muted); text-transform:uppercase; font-size:0.95rem; margin-bottom: 10px;">Historique des sessions</h3>
+          <div class="history-list" id="historyList"></div>
+        </div>
+      </section>
+
+      <section class="screen" id="quizScreen">
+        <div class="question-meta">
+          <span class="q-source" id="qSource">Source</span>
+          <div class="q-text" id="qText">Texte de la question</div>
+        </div>
+        <div class="options" id="optionsContainer"></div>
+        <div class="explanation" id="explanationBox">
+          <h4 id="expStatus">Correction</h4>
+          <p id="expText">Texte de la correction</p>
+        </div>
+        <div class="actions-bar">
+          <div style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600;" id="hintText">Sélectionne tes réponses.</div>
+          <div style="display:flex; gap:15px; flex-wrap:wrap; align-items: center; flex-grow: 1;" id="actionButtons">
+            <button class="btn btn-outline" id="prevBtn" style="display:none;">⬅ Précédent</button>
+            <button class="btn btn-outline" id="skipBtn">Passer</button>
+            <button class="btn btn-primary" id="validateBtn">Valider</button>
+            <button class="btn btn-primary" id="nextBtnExam" style="display:none;">Suivant ➔</button>
+            <button class="btn btn-primary" id="nextBtn" style="display:none; width:100%;">Question Suivante ➔</button>
+            <button class="btn btn-danger" id="finishExamBtn" style="display:none; margin-left: auto;">Terminer l'examen</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="screen" id="endScreen">
+        <div class="text-center">
+          <h2 id="endTitle" style="font-size: 2rem; margin-bottom:10px;">Fin de la session !</h2>
+          <p id="endSummary" style="font-size: 1.2rem; color:var(--text-muted);"></p>
+          <div id="endTotalTime" style="font-size: 1.15rem; color: var(--primary); font-weight: 800; margin-top: 15px; background: var(--primary-light); display: inline-block; padding: 8px 16px; border-radius: 20px;">⏱️ Temps total : 0m 0s</div>
+        </div>
+        
+        <div id="wrongBlock" style="display:none; margin-top: 25px;">
+          <h3 style="color:var(--danger); border-bottom: 2px solid var(--border); padding-bottom:10px;">Correction de tes erreurs</h3>
+          <div class="wrong-list" id="wrongList"></div>
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:15px; margin-top:30px; flex-wrap:wrap;">
+          <button class="btn btn-outline" id="backHomeEndBtn">🔙 Retour Accueil</button>
+          <button class="btn btn-outline" id="exportBtn" style="display:none;">📥 Exporter (.txt)</button>
+          <button class="btn btn-danger" id="retryWrongBtn" style="display:none;">Refaire mes erreurs</button>
+          <button class="btn btn-primary" id="restartBtn">Rejouer</button>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+/**********************************************************************
+ * BASE DE DONNÉES INTÉGRALE DES 8 COURS
+ **********************************************************************/
+const libraryData = {
+  "moyen_age": {
+    icon: "🏰", title: "Moyen Âge & Médecine traditionnelle",
+    db: [
+      { id: "SP-ANN-2021-Q47", source: "2021 PACES — Question 47", question: "Les principales maladies du Moyen Age étaient :", options: ["A) la conséquence d'une carence vitaminique", "B) dues à l'ergot de seigle", "C) liées à un syndrome métabolique (obésité)", "D) d'origine allergique"], correct: [0, 1], explanation: "A. Vrai.\nB. Vrai.\nC. Faux : au Moyen Age, la population était majoritairement sous-alimentée, l’obésité n’était donc pas une maladie fréquente.\nD. Faux : les allergies sont des maladies actuelles." },
+      { id: "SP-ANN-2020-Q79", source: "2020 — Question 79", question: "La médecine traditionnelle chinoise repose sur le(s) principe(s) suivant(s) :", options: ["A) la pharmacopée occupe une place importante", "B) la maladie peut être liée à une stagnation de l'énergie", "C) la maladie peut être liée à une circulation trop rapide de l'énergie", "D) l'énergie circule dans les méridiens"], correct: [0, 1, 2, 3], explanation: "A. Vrai.\nB. Vrai.\nC. Vrai.\nD. Vrai." },
+      { id: "SP-ANN-2019-Q49", source: "2019 — Question 49", question: "Point(s) commun(s) entre l'organisation de la prise en charge médicale contemporaine et moyenâgeuse en France :", options: ["A) une prise en charge des plus pauvres", "B) une proposition de soutien social", "C) la gratuité totale des soins pour tous", "D) l’absence de prise en charge efficace des malades"], correct: [0, 1], explanation: "A. Vrai.\nB. Vrai.\nC. Faux : les soins ne sont pas totalement gratuits (remboursés / subventionnés).\nD. Faux : de nos jours, les hôpitaux prennent efficacement en charge les malades." },
+      { id: "SP-ANN-2019-Q50", source: "2019 — Question 50", question: "L'acupuncture chinoise :", options: ["A) a une efficacité thérapeutique en partie validée", "B) est incompatible avec un traitement issu de la Médecine moderne", "C) est basée sur la circulation des énergies", "D) repose en partie sur la palpation des pouls"], correct: [0, 2, 3], explanation: "A. Vrai : efficacité en complément d’un traitement moderne (EBM).\nB. Faux : associée à un traitement contemporain, elle peut améliorer l’efficacité.\nC. Vrai.\nD. Vrai : analyse du pouls pour orienter le diagnostic/les points." },
+      { id: "SP-ANN-2018-Q49", source: "2018 — Question 49", question: "Le créationnisme est :", options: ["A. scientifiquement validé", "B. assorti d'une connotation religieuse", "C. actuellement enseigné aux U.S.A.", "D. vivace au Moyen-Age"], correct: [1, 2, 3], explanation: "A. Faux : incompatible avec les hypothèses scientifiques.\nB. Vrai.\nC. Vrai.\nD. Vrai." },
+      { id: "SP-ANN-2018-Q50", source: "2018 — Question 50", question: "La (les) principale(s) maladie(s) du Moyen-Age est (sont) :", options: ["A. de surcharge (hypercalorique)", "B. infectieuse(s)", "C. génétique(s)", "D. nosocomiale(s)"], correct: [1], explanation: "A. Faux : population carencée.\nB. Vrai.\nC. Faux : maladies génétiques considérées contemporaines.\nD. Faux : nosocomiales considérées contemporaines." },
+      { id: "SP-ANN-Q51", source: "Annales — Question 51", question: "La (les) thérapeutique(s) du Moyen-Age est (sont) :", options: ["A. la thériaque", "B. l'écorce de saule bouillie", "C. les pierres de couleur", "D. le foin moisi"], correct: [0, 1, 2], explanation: "A. Vrai.\nB. Vrai.\nC. Vrai.\nD. Faux : le foin moisi a été utilisé par Pouchet au XIXe siècle." },
+      { id: "SP-ANN-Q52", source: "Annales — Question 52", question: "Caractéristiques(s) de la Médecine Indienne (des Indes) :", options: ["A. de conception ayurvédique", "B. liée à l'absence de limite entre l'âme et le corps", "C. une action volontaire sur les fonctions végétatives", "D. liée au concept de méridiens"], correct: [0, 1, 2], explanation: "A. Vrai.\nB. Vrai.\nC. Vrai.\nD. Faux : les méridiens relèvent de la médecine chinoise." },
+      { id: "SP-ANN-2015-Q47", source: "2015 — Question 47", question: "Les principales maladies mortelles du Moyen-âge étaient :", options: ["A. les maladies de surcharge (diabète ...)", "B. les maladies cardio vasculaires", "C. cancers", "D. les maladies infectieuses"], correct: [3], explanation: "A. Faux : personnes carencées.\nB. Faux.\nC. Faux.\nD. Vrai : infectieuses." },
+      { id: "SP-ANN-2015-Q48", source: "2015 — Question 48", question: "Le fonctionnement de la Médecine traditionnelle chinoise est caractérisé par :", options: ["A. la circulation de flux d’énergie dans des méridiens", "B. une stagnation de l’énergie", "C. des méridiens anatomiques et visualisables", "D. l’utilisation d’une pharmacopée étendue"], correct: [0, 3], explanation: "A. Vrai.\nB. Faux : l’énergie doit circuler.\nC. Faux : méridiens non anatomiques.\nD. Vrai : pharmacopée abondante." },
+      { id: "SP-ANN-2011-Q45", source: "2011 — Question 45", question: "En médecine chinoise, les méridiens :", options: ["a) correspondent à des structures anatomiques identifiables", "b) correspondent à des trajets d’énergie", "c) sont distribués sur toute la surface du corps", "d) ont un trajet qui varie en fonction des saisons"], correct: [1, 2], explanation: "a) Faux : non identifiables anatomiquement.\nb) Vrai.\nc) Vrai : corps comme entité énergétique.\nd) Faux : le trajet varie selon l’état de santé (dans ce corrigé)." },
+      { id: "SP-QE4-Q01", source: "QE4 — Question 1", question: "Concernant la pratique médicale durant le Moyen Âge :", options: ["A) Rome était un centre de rayonnement de la culture scientifique et médicale", "B) un système de formation mixte permettait un apprentissage pratique et théorique de la médecine à Constantinople", "C) les universités étaient encadrées par les autorités religieuses", "D) les soins prodigués étaient équivalents pour les riches et les pauvres", "E) les réseaux sanitaires ont été créés pour les pèlerinages"], correct: [1, 2, 4], explanation: "A. Faux : Constantinople était un centre de rayonnement.\nB. Vrai.\nC. Vrai.\nD. Faux : pauvres à l’Hôtel-Dieu, riches soignés à domicile.\nE. Vrai." },
+      { id: "SP-QE4-Q02", source: "QE4 — Question 2", question: "Parmi ces traitements médicaux, le ou lesquels étai(en)t réalisé(s) durant le Moyen Âge ?", options: ["A) l’utilisation de la thériaque (élixir universel)", "B) l’extraction du principe actif de l’écorce de saule", "C) l’utilisation du principe de similitude", "D) la chirurgie de l’appareil digestif", "E) des drainages superficiels"], correct: [0, 2, 4], explanation: "A. Vrai.\nB. Faux : usage empirique de l’écorce, pas extraction.\nC. Vrai.\nD. Faux : seulement petits actes (drainages superficiels).\nE. Vrai." },
+      { id: "SP-QE4-Q03", source: "QE4 — Question 3", question: "De nos jours, l’Hôpital public :", options: ["A) perd son caractère social au détriment de la rentabilité", "B) possède les capacités financières pour la prise en charge de patients polypathologiques", "C) accueille les patients sans distinction de revenu", "D) recrute des médecins moins compétents qu’en clinique", "E) est subventionné par l’Eglise"], correct: [0, 2], explanation: "A. Vrai.\nB. Faux : patients polypathologiques = souvent “non rentables”.\nC. Vrai.\nD. Faux : actes techniques, compétence non en cause.\nE. Faux : plus de lien Église/hôpital public." },
+      { id: "SP-QE4-Q04", source: "QE4 — Question 4", question: "A partir de l’an 1000, la pratique médicale et scientifique en Europe :", options: ["A) se développe grâce au dynamisme économique religieux", "B) dépend de médecins érudits issus d’une formation créationniste", "C) devait respecter les dogmes religieux", "D) se base essentiellement sur des connaissances erronées", "E) utilise un raisonnement scolastique"], correct: [0, 1, 2, 3, 4], explanation: "A. Vrai (croisades, cathédrales…).\nB. Vrai.\nC. Vrai.\nD. Vrai.\nE. Vrai." },
+      { id: "SP-QE4-Q05", source: "QE4 — Question 5", question: "Les maladies du Moyen Âge étaient :", options: ["A) des carences alimentaires", "B) l’obésité", "C) essentiellement infectieuses", "D) les allergies", "E) l’ergotisme"], correct: [0, 2, 4], explanation: "A. Vrai.\nB. Faux : obésité actuelle.\nC. Vrai.\nD. Faux : allergies plus récentes.\nE. Vrai." },
+      { id: "SP-QE4-Q06", source: "QE4 — Question 6", question: "Durant le Moyen Âge, les Hôtels-Dieu :", options: ["A) ont été créés en France grâce au renouveau économique", "B) sont les ancêtres des cliniques privées actuelles", "C) sont des structures d’accueil pour indigents", "D) assuraient une prise en charge médicale efficace", "E) fournit principalement un abri et à manger"], correct: [0, 2, 4], explanation: "A. Vrai.\nB. Faux : ancêtres des hôpitaux publics.\nC. Vrai.\nD. Faux : médecins peu efficaces.\nE. Vrai." },
+      { id: "SP-QE4-Q07", source: "QE4 — Question 7", question: "De nos jours, la pratique médicale privée :", options: ["A) accueille principalement des patients jeunes", "B) privilégie le traitement des maladies chroniques", "C) privilégie des actes médicaux aigus", "D) est souvent associée à une patientèle aisée", "E) assure une prise en charge sociale et médicale"], correct: [0, 2, 3], explanation: "A. Vrai.\nB. Faux : cliniques souvent sur hospitalisations à court terme.\nC. Vrai.\nD. Vrai.\nE. Faux : prise en charge sociale surtout hôpitaux publics." },
+      { id: "SP-QE4-Q08", source: "QE4 — Question 8", question: "Les principales maladies professionnelles du Moyen-Âge étaient :", options: ["A) les accidents sur les chantiers de construction", "B) le stress", "C) les cancers", "D) les empoisonnements dans les mines", "E) les maladies respiratoires liées à la poussière"], correct: [0, 3, 4], explanation: "A. Vrai.\nB. Faux : stress actuel.\nC. Faux : espérance de vie trop courte.\nD. Vrai.\nE. Vrai." },
+      { id: "SP-QE4-Q09", source: "QE4 — Question 9", question: "Le créationnisme :", options: ["A) est une hypothèse scientifique sur l’apparition de l’Homme sur Terre", "B) est enseigné dans certaines universités américaines", "C) estime que l’humanité actuelle est issue d’une dizaine d’individus", "D) considère que l’Homme est apparu par un hasard sélectif", "E) est compatible avec les théories évolutionnistes"], correct: [1], explanation: "A. Faux : hypothèse religieuse.\nB. Vrai.\nC. Faux : descendance d’Adam et Ève (dans ce cadre).\nD. Faux : création par Dieu.\nE. Faux : incompatible avec l’évolutionnisme." },
+      { id: "SP-QE4-Q10", source: "QE4 — Question 10", question: "Principales maladies infectieuses du Moyen-Age :", options: ["A) la lèpre", "B) la grippe espagnole", "C) la peste", "D) la variole", "E) le SRAS"], correct: [0, 2, 3], explanation: "A. Vrai.\nB. Faux : après la 1ère guerre mondiale.\nC. Vrai.\nD. Vrai.\nE. Faux : XXIe siècle." },
+      { id: "SP-QE4-Q11", source: "QE4 — Question 11", question: "Concernant la Médecine précolombienne :", options: ["A) ils disposaient d’une pharmacopée plus importante qu’en Europe", "B) les prêtres (sorciers) entraient en transe pour communiquer avec l’Au-delà", "C) leur espérance de vie était plus grande que celle des Européens", "D) la maladie était dissociée du péché", "E) la maladie était associée à une modification (teint de la peau, aspect des dents…)"], correct: [0, 1, 4], explanation: "A. Vrai.\nB. Vrai.\nC. Faux : espérance de vie similaire.\nD. Faux : maladie associée au péché.\nE. Vrai." },
+      { id: "SP-QE4-Q12", source: "QE4 — Question 12", question: "Maladie(s) apportée(s) par les Européens aux Amérindiens :", options: ["A) la syphilis", "B) la tuberculose", "C) la grippe", "D) la variole", "E) l’alcoolisme"], correct: [1, 2, 3], explanation: "A. Faux : syphilis transmise des Amérindiens aux Européens (dans ce corrigé).\nB. Vrai.\nC. Vrai.\nD. Vrai.\nE. Faux : alcoolisme existait déjà de manière endémique." },
+      { id: "SP-QE4-Q13", source: "QE4 — Question 13", question: "Les maladies importées par les Européens lors de la conquête du nouveau monde :", options: ["A) ont provoqué la mort importante des amérindiens car leur système immunitaire n’y était pas préparé", "B) étaient moins virulentes que celles des Précolombiens", "C) sont probablement à l’origine du commerce triangulaire", "D) étaient essentiellement des parasitoses", "E) n’ont eu qu’un faible impact sur la population amérindienne"], correct: [0, 2], explanation: "A. Vrai.\nB. Faux : plus virulentes pour les Amérindiens.\nC. Vrai.\nD. Faux : surtout infectieuses (viroses, variole, tuberculose).\nE. Faux : population divisée par dix (dans ce corrigé)." },
+      { id: "SP-QE4-Q14", source: "QE4 — Question 14", question: "En Médecine indienne, la conception ayurvédique :", options: ["A) correspond à la caste des guérisseurs peu compétents", "B) est caractérisée par l’absence de limitation entre le visible et l’invisible", "C) perçoit la santé comme un équilibre des humeurs", "D) perçoit la maladie comme une transgression des règles", "E) permet d’agir volontairement sur les fonctions végétatives"], correct: [1, 2, 3, 4], explanation: "A. Faux : caste des médecins instruits (dans ce corrigé).\nB. Vrai.\nC. Vrai.\nD. Vrai.\nE. Vrai." },
+      { id: "SP-QE4-Q15", source: "QE4 — Question 15", question: "Traitement(s) médical(aux) utilisé(s) en médecine ayurvédique :", options: ["A) les saignées", "B) les massages aux huiles", "C) l’exercice physique", "D) les régimes", "E) les frictions"], correct: [1, 2, 3], explanation: "A. Faux : saignées non pratiquées.\nB. Vrai.\nC. Vrai.\nD. Vrai.\nE. Faux : frictions attribuées aux précolombiens (dans ce corrigé)." },
+      { id: "SP-QE4-Q16", source: "QE4 — Question 16", question: "La pratique Médicale traditionnelle chinoise est caractérisée par :", options: ["A) l’existence de lignes de forces où l’énergie (Qi) circule", "B) la définition d’une centaine de caractéristiques du pouls", "C) l’équilibre entre des forces opposées (Yin et Yang)", "D) une pharmacopée très abondante", "E) l’utilisation de l’acuponcture pour réguler la circulation du Qi"], correct: [0, 1, 2, 3, 4], explanation: "A. Vrai.\nB. Vrai.\nC. Vrai.\nD. Vrai.\nE. Vrai." },
+      { id: "SP-QE4-Q17", source: "QE4 — Question 17", question: "Exemple(s) de pratique(s) médicale(s) issue(s) de la tradition dont l’efficacité a été validée par la médecine fondée sur les faits :", options: ["A) la thérapie ayurvédique (basée sur le véda)", "B) la magnétisation", "C) l’acuponcture", "D) la thériaque", "E) le principe de similitude"], correct: [2], explanation: "C. Vrai : seule l’acuponcture est validée (dans ce corrigé).\nA, B, D, E. Faux : considérées inefficaces (dans ce corrigé)." },
+      { id: "SP-QE4-Q18", source: "QE4 — Question 18", question: "La pratique médicale traditionnelle chinoise se base sur plusieurs observations telles que :", options: ["A) le ton de la voix", "B) la sudation", "C) la respiration", "D) l’expectoration", "E) la tension artérielle"], correct: [0, 2, 3], explanation: "A. Vrai.\nB. Faux : sudation = thérapie précolombienne (dans ce corrigé).\nC. Vrai.\nD. Vrai.\nE. Faux : TA = médecine moderne ; en traditionnel chinois, on étudie le pouls." },
+      { id: "SP-QE4-Q19", source: "QE4 — Question 19", question: "Dans la médecine traditionnelle chinoise, le Qi :", options: ["A) doit circuler de manière harmonieuse pour être en bonne santé", "B) circule dans les méridiens", "C) peut être contrôlé grâce au yoga", "D) peut être régulé en piquant les méridiens sur des zones précises", "E) peut accélérer en cas de maladie"], correct: [0, 1, 3, 4], explanation: "A. Vrai.\nB. Vrai.\nC. Faux.\nD. Vrai : régulation via acupuncture.\nE. Vrai." }
+    ]
+  },
+  "renaissance": {
+    icon: "🔬", title: "Renaissance au XVIIIe",
+    db: [
+      { id:"QE5-Q1", source:"QE5 — Question 1", question:"La Médecine de la Renaissance se distingue par :", options:["A) une rupture totale entre l’Eglise et les universités","B) une remise en question des dogmes religieux","C) la pratique de la chirurgie par les garçons barbiers","D) le maintien des principes médicaux édictés par Galien","E) la remise en question des traitements moyenâgeux"], correct:[1,2], explanation:"A FAUX : l’Eglise reste très attentive.\nD FAUX : Les principes médicaux de Galien sont remis en question.\nE FAUX : traitements similaires au Moyen-Âge." },
+      { id:"QE5-Q2", source:"QE5 — Question 2", question:"La Médecine de la Renaissance est similaire au Moyen-Âge au niveau :", options:["A) des maladies rencontrées","B) des traitements utilisés","C) de la formation des médecins","D) des connaissances anatomiques","E) de la pensée scientifique"], correct:[0,1,2], explanation:"A VRAI\nB VRAI\nC VRAI\nD FAUX : l’anatomie est autorisée et remet en cause Galien." },
+      { id:"QE5-Q3", source:"QE5 — Question 3", question:"Quelques avancées médicales et scientifiques ont eu lieu au XVIIème siècle. Quelle(s) est (sont) elle(s) ?", options:["A) le remplacement des hôtels Dieu par les hôpitaux","B) l’apparition des premiers microscopes","C) la découverte de la circulation sanguine","D) la démonstration de la circulation des humeurs","E) l’explication du souffle vital"], correct:[1,2], explanation:"B VRAI\nC VRAI" },
+      { id:"QE5-Q4", source:"QE5 — Question 4", question:"Durant le XVIIe siècle :", options:["A) le fonctionnement du corps est expliqué par des principes biologiques","B) la majorité des thérapies est inefficace","C) les structures de soins sont similaires au Moyen-Âge","D) on pratiquait les lavements et les saignées","E) la famine et les épidémies sont les principaux problèmes sanitaires"], correct:[1,2,3,4], explanation:"A FAUX : expliqué par des principes physiques (Iatromécanisme)." },
+      { id:"QE5-Q5", source:"QE5 — Question 5", question:"L’amiante :", options:["A) est un cancérogène","B) est composé de silice instable","C) provoque la formation de radicaux libres","D) est à l’origine de mutations","E) a une structure fibreuse"], correct:[0,2,3,4], explanation:"B FAUX : le Fe3+ de l’amiante est instable." },
+      { id:"QE5-Q6", source:"QE5 — Question 6", question:"Découverte(s) expérimentale(s) du 18ème siècle :", options:["A) les sucs digestifs","B) le rôle du sang dans le transport de l’oxygène","C) la vaccination contre la rage","D) la mémoire de l’eau","E) la vitamine C"], correct:[0,1], explanation:"C FAUX : vaccin contre la rage (Pasteur) = XIXe siècle.\nE FAUX : on ne l'identifie pas encore." },
+      { id:"QE5-Q7", source:"QE5 — Question 7", question:"Concernant les maladies professionnelles au XVIIIe siècle, quels domaines ont été développés ?", options:["A) l’adaptation du travail aux capacités de l’individu","B) la mise en place de la médecine du travail","C) le référencement des maladies professionnelles","D) les premiers traitements du cancer du scrotum","E) la première description du stress"], correct:[0,2,4], explanation:"B FAUX : XXe siècle.\nC VRAI : Ramazzini." },
+      { id:"QE5-Q8", source:"QE5 — Question 8", question:"La pratique médicale du XVIIIe siècle est caractérisée par :", options:["A) la formation des médecins à la faculté","B) l’essor de la médecine hippocratique (palpation, auscultation)","C) le maintien d’une médecine traditionnelle à la campagne","D) l’extraction en laboratoire des molécules responsables de certains effets empiriques éprouvés","E) l’amélioration de la prise en charge hospitalière"], correct:[0,2], explanation:"A VRAI\nC VRAI" },
+      { id:"QE5-Q9", source:"QE5 — Question 9", question:"Intérêt(s) de l’ergonomie en entreprise :", options:["A) inciter l’employé à dépasser ses capacités personnelles","B) adapter la charge de travail à l’employé","C) réduire la fatigue liée au travail","D) réduire le temps de travail","E) améliorer l’efficacité de travail"], correct:[1,2,4], explanation:"B VRAI\nC VRAI\nE VRAI" },
+      { id:"QE5-Q10", source:"QE5 — Question 10", question:"Quel(s) auteur(s) a (ont) participé au développement de l’expérimentation au XVIIIe siècle ?", options:["A) Harvey","B) Pouchet","C) Réaumur","D) Pasteur","E) Lavoisier"], correct:[2,4], explanation:"C VRAI\nE VRAI" },
+      { id:"QE5-Q11", source:"QE5 — Question 11", question:"Les hydrocarbures aromatiques polycycliques :", options:["A) sont des cancérogènes","B) peuvent provoquer un cancer bronchique après inhalation","C) sont des polluants environnementaux","D) sont présents dans les fumées de combustion","E) sont des perturbateurs endocriniens"], correct:[0,1,2,3,4], explanation:"Tout est VRAI." },
+      { id:"QE5-Q12", source:"QE5 — Question 12", question:"Le stress :", options:["A) est dépendant de la sensibilité individuelle","B) permet de répondre aux contraintes environnementales","C) correspond uniquement à un état de panique","D) peut être lié à une incapacité de répondre à une sollicitation extérieure","E) ne possède pas de définition scientifique valide"], correct:[0,1,3], explanation:"A VRAI\nB VRAI\nD VRAI" },
+      { id:"ACC-2017-Q45", source:"ACC 2017 — Question 45", question:"À propos du stress :", options:["A) l’évolution du stress est toujours personne-dépendante","B) l’eustress est un stress dont le rôle est bénéfique","C) le dystress est un stress dont le rôle est bénéfique","D) le stress est une notion scientifique définie dans les années 2000"], correct:[0,1], explanation:"A VRAI\nB VRAI" },
+      { id:"ACC-2016-Q47", source:"ACC 2016 — Question 47", question:"Le stress est :", options:["A) dépendant de caractéristiques propres à chaque individu","B) peut être un témoin de bonne adaptation dans certaines circonstances","C) peut être un témoin de santé altérée dans certaines circonstances","D) est impossible à définir"], correct:[0,1,2], explanation:"A VRAI\nB VRAI\nC VRAI" },
+      { id:"ACC-2015-Q49", source:"ACC 2015 — Question 49", question:"Maladie(s) environnementale(s) mortelle(s) de nos jours :", options:["A) cancer du poumon provoqué par les particules fines issues des fumées d’échappement des véhicules","B) infarctus du myocarde dû au travail","C) consommation de viande contenant des plombs de chasse à l’origine du cancer de l’estomac","D) champs magnétiques émis par des fours à micro-ondes provoquant des tumeurs cérébrales"], correct:[0,1], explanation:"A VRAI\nB VRAI" },
+      { id:"ACC-2012-Q48", source:"ACC 2012 — Question 48", question:"Quel(s) médecin(s) du 18ème siècle a (ont) participé au développement de l’expérimentation ?", options:["A) Robert Debré","B) Lavoisier","C) Pasteur","D) Koch"], correct:[1], explanation:"B VRAI (Lavoisier)." }
+    ]
+  },
+  "medecin_societe": {
+    icon: "🤝", title: "Médecin et Société",
+    db: [
+      { id:"QE1-Q1", source:"QE1 — Question 1", question:"La médecine actuelle nécessite une formation universelle. Quelle(s) est (sont) la (les) discipline(s) que le médecin doit intégrer au cours de sa formation initiale ?", options:["A) religieuses pour mieux comprendre le patient","B) artistiques pour dessiner des planches d’anatomie","C) physiologiques pour comprendre les mécanismes biologiques normaux et pathologiques","D) technologiques pour réparer soi-même les appareils de diagnostics","E) éthiques pour ne pas demander de dépassements d’honoraires injustifiés"], correct:[0,2,4], explanation:"A) VRAI.\nC) VRAI.\nE) VRAI." },
+      { id:"QE1-Q2", source:"QE1 — Question 2", question:"Une stratégie de prévention reposant sur le comportement des patients semble permettre d’accroître l’espérance de vie d’environ 10 ans. Quel(s) est (sont) le(s) facteur(s) impliqué(s) ?", options:["A) une activité physique régulière","B) la limitation de la consommation d’alcool","C) la consommation d’au moins 5 fruits et légumes par jour","D) la consommation d’une nourriture certifiée d’origine française ou européenne","E) ne pas fumer"], correct:[0,1,2,4], explanation:"A, B, C, E sont VRAIS. La certification d'origine n'a pas cet impact prouvé de 10 ans." },
+      { id:"QE1-Q3", source:"QE1 — Question 3", question:"Les connaissances des données génétiques d’un patient permettent :", options:["A) de connaître les prédispositions d’un patient à contracter certaines maladies (Alzheimer …)","B) d’empêcher l’apparition d’une maladie grâce à des actes de prévention","C) de guérir de n’importe quelle maladie","D) de choisir les caractères physiques de son futur enfant (couleur des yeux, sexe)","E) de prédire la date de son décès"], correct:[0,1], explanation:"A) VRAI.\nB) VRAI." },
+      { id:"QE1-Q4", source:"QE1 — Question 4", question:"De nos jours, le traitement du cancer bronchique :", options:["A) n’est pas pris en charge pour les patients couverts par la CMU (couverture universelle)","B) permet d’augmenter considérablement l’espérance de vie du patient","C) n’est remboursé que pour les patients non-fumeurs","D) pourrait le plus souvent être évité grâce à des actes de prévention (éviter de fumer)","E) est financé différemment selon le pays"], correct:[3,4], explanation:"D) VRAI.\nE) VRAI." },
+      { id:"QE1-Q5", source:"QE1 — Question 5", question:"Le(s) défi(s) médical(aux) d’aujourd’hui et de demain est (sont) :", options:["A) le développement de la thérapie génique","B) augmenter la prescription d’actes de prévention","C) remplacer les chirurgiens par des robots","D) améliorer l’efficacité des traitements avec un coût raisonnable pour la société","E) interdire les consultations sur internet"], correct:[0,1,3], explanation:"A) VRAI.\nB) VRAI.\nD) VRAI." },
+      { id:"ACC-2021-PACES-Q41", source:"ACC 2021 PACES — Question 41", question:"Les modalités de l'exercice médical sont liées :", options:["A) à l'époque correspondante (antiquité, moyen âge...)","B) aux mœurs de l'époque","C) aux us et coutumes en vigueur","D) au dynamisme économique contemporain de la période"], correct:[0,1,2,3], explanation:"A) VRAI.\nB) VRAI.\nC) VRAI.\nD) VRAI." },
+      { id:"ACC-2020-Q72", source:"ACC 2020 — Question 72", question:"L'analyse du génome humain permet :", options:["A) de prévenir l'apparition de toutes les maladies","B) de prédire l'apparition de certaines maladies","C) éthiquement, de sélectionner professionnellement les actifs","D) d'identifier certaines maladies rares"], correct:[1,3], explanation:"B) VRAI.\nD) VRAI." },
+      { id:"ACC-2020-Q73", source:"ACC 2020 — Question 73", question:"La prévention médicale comparée aux thérapeutiques :", options:["A) est plus onéreuse","B) est moins efficace","C) implique fréquemment le volontariat du patient","D) peut être envisagée actuellement pour toutes les maladies"], correct:[2], explanation:"C) VRAI." },
+      { id:"ACC-2020-Q74", source:"ACC 2020 — Question 74", question:"L'éthique médicale :", options:["A) conduit à maintenir un patient en vie en toute circonstance","B) implique de déconseiller systématiquement les traitements les plus coûteux","C) conduit à étudier le rapport bénéfice/risque d'une thérapeutique","D) implique de prendre en considération et d'étudier les demandes des patients"], correct:[2,3], explanation:"C) VRAI.\nD) VRAI." },
+      { id:"ACC-2019-Q45", source:"ACC 2019 — Question 45", question:"La Médecine prédictive :", options:["A) permet d'identifier un risque de survenue de maladie","B) permet de traiter une maladie incurable auparavant","C) est à l'origine de nouveaux traitements","D) permet d'éradiquer certaines maladies"], correct:[0], explanation:"A) VRAI." },
+      { id:"ACC-2018-Q41", source:"ACC 2018 — Question 41", question:"La Médecine prédictive permet :", options:["A) d'identifier l'année du décès","B) de confirmer de façon certaine l'apparition d'une maladie","C) de guérir certains patients","D) de réduire le risque de survenue de certaines maladies"], correct:[3], explanation:"D) VRAI." },
+      { id:"ACC-2018-Q42", source:"ACC 2018 — Question 42", question:"La prévention :", options:["A) est souvent plus coûteuse pour une maladie déterminée que le traitement médicamenteux correspondant","B) peut éviter l'apparition de certaines maladies","C) est assimilable à la prédiction","D) est essentiellement thérapeutique"], correct:[1], explanation:"B) VRAI." },
+      { id:"ACC-2017-Q41", source:"ACC 2017 — Question 41", question:"Parmi les éléments suivants lequel (lesquels) permet(tent) d'accroître l'espérance de vie d'une dizaine d'années ?", options:["A) ne pas fumer","B) pour une femme, boire 3 verres d'alcool par jour","C) avoir une activité physique régulière","D) avoir une consommation journalière de 5 fruits et légumes"], correct:[0,2,3], explanation:"A) VRAI.\nC) VRAI.\nD) VRAI." },
+      { id:"ACC-2016-Q41", source:"ACC 2016 — Question 41", question:"Quelle(s) est (sont) la (les) maladie(s) pouvant faire l'objet de prescriptions préventives (et non pas prédictives) permettant d'éviter ou de retarder leur apparition ?", options:["A) les maladies coronariennes","B) certains types de cancers","C) la maladie d'Alzheimer","D) l’obésité"], correct:[0,1,3], explanation:"A) VRAI.\nB) VRAI.\nD) VRAI." },
+      { id:"ACC-2016-Q42", source:"ACC 2016 — Question 42", question:"L'exercice de la Médecine actuelle peut :", options:["A) faire intervenir un robot pour assister un chirurgien","B) comporter une recherche génétique pour identifier l'origine d'une maladie","C) prédire les risques d'apparition de certaines maladies déterminées","D) se passer en totalité de l'intervention d'un médecin"], correct:[0,1,2], explanation:"A) VRAI.\nB) VRAI.\nC) VRAI." },
+      { id:"ACC-2015-Q41", source:"ACC 2015 — Question 41", question:"De nos jours un acte médical débouchant sur des effets indésirables peut :", options:["A) conduire le patient à assigner le Médecin en justice","B) obliger le Médecin à indemniser le patient","C) condamner le Médecin à une peine d’emprisonnement","D) compromettre le droit d’exercice médical"], correct:[0,1,2,3], explanation:"A) VRAI.\nB) VRAI.\nC) VRAI.\nD) VRAI." },
+      { id:"ACC-2012-Q43", source:"ACC 2012 — Question 43", question:"Le(s) défi(s) médical(aux) actuel(s) est (sont) :", options:["A) la prédiction du risque d’apparition de certaines maladies","B) le financement de la sécurité sociale","C) le développement de la prévention médicale","D) la négociation des dépassements d'honoraires"], correct:[0,1,2], explanation:"A) VRAI.\nB) VRAI.\nC) VRAI." },
+      { id:"ACC-2011-Q41", source:"ACC 2011 — Question 41", question:"La formation initiale et continue d’un médecin intègre les disciplines suivantes :", options:["A) scientifiques","B) légales","C) psychosociales","D) éthiques"], correct:[0,1,2,3], explanation:"A) VRAI.\nB) VRAI.\nC) VRAI.\nD) VRAI." }
+    ]
+  },
+  "origines_vie": {
+    icon: "🧬", title: "Origines de la vie",
+    db: [
+      { id:"QE2-Q1", source:"QE2 — Question 1", question:"L’apparition de l’Univers :", options:["A) a eu lieu il y a environ 14 millions d’années","B) est caractérisée par une dilatation particulièrement lente","C) a permis un dégagement important de chaleur","D) provient de l’explosion d’une poussière invisible","E) est associée à des facteurs physiques extrêmement précis"], correct:[2,3,4], explanation:"C) Vrai.\nD) Vrai.\nE) Vrai." },
+      { id:"QE2-Q2", source:"QE2 — Question 2", question:"Le mur de Planck :", options:["A) correspond à l’état de l’Univers juste après l’explosion primordiale","B) a été construit à Berlin en hommage à Max Planck pour ses théories sur l’origine de l’Univers","C) représente la structure enveloppant l’Univers actuel","D) correspond à une barrière théorique","E) empêche de connaître l’état de l’Univers avant le Big Bang"], correct:[0,3,4], explanation:"A) Vrai.\nD) Vrai.\nE) Vrai." },
+      { id:"QE2-Q3", source:"QE2 — Question 3", question:"La naissance de l’univers est en lien étroit avec :", options:["A) la force électromagnétique du noyau des atomes","B) la force neutron-proton","C) la formation des atomes","D) sa vitesse d’expansion","E) la fusion de l’hydrogène"], correct:[0,1,2,3,4], explanation:"A) Vrai.\nB) Vrai.\nC) Vrai.\nD) Vrai.\nE) Vrai." },
+      { id:"QE2-Q4", source:"QE2 — Question 4", question:"Elément(s) à l’origine des premières cellules procaryotes :", options:["A) matériel génétique sous forme d’acide désoxyribonucléique","B) rayonnements cosmiques et chaleur pour former des acides aminés","C) lipides pour former les premières membranes","D) lumière pour fournir un souffle vital","E) la sélection naturelle des formes viables"], correct:[1,2,4], explanation:"B) Vrai.\nC) Vrai.\nE) Vrai." },
+      { id:"QE2-Q5", source:"QE2 — Question 5", question:"Concernant les premiers êtres pluricellulaires :", options:["A) ils sont apparus dans les océans","B) les arthropodes étaient initialement les proies des vertébrés","C) ils étaient les exosquelettes et les endosquelettes","D) la conquête du milieu terrestre s’est traduite par une inversion du rapport de force entre ces êtres","E) ils sont apparus il y a 3 milliards d’années"], correct:[0,2,3], explanation:"A) Vrai.\nC) Vrai.\nD) Vrai." },
+      { id:"QE2-Q6", source:"QE2 — Question 6", question:"La disparition des dinosaures est probablement due à :", options:["A) la diminution considérable de leurs ressources alimentaires","B) une comète","C) l’apparition des premiers hominidés","D) un déluge","E) une épidémie"], correct:[0,1], explanation:"A) Vrai.\nB) Vrai." },
+      { id:"QE2-Q7", source:"QE2 — Question 7", question:"A propos de l’évolution de l’Homme :", options:["A) elle est caractérisée, à l’origine, par l’existence de plusieurs races d’hominidés","B) elle est symbolisée par une courbe linéaire","C) l’homme de Toumaï est apparu il y a environ 40 000 ans","D) Homo habilis a été le premier à utiliser des outils","E) elle est probablement liée à l’évolution de l’environnement"], correct:[0,3,4], explanation:"A) Vrai.\nD) Vrai.\nE) Vrai." },
+      { id:"QE2-Q8", source:"QE2 — Question 8", question:"Savane vs forêt : quelles modifications chez l’Homme ?", options:["A) la libération de la main","B) l’apparition des yeux bridés pour une meilleure vision de loin","C) une meilleure perception du gibier et des prédateurs","D) la réduction de la surface de peau exposée au soleil","E) la réduction de la pilosité"], correct:[0,2,3], explanation:"A) Vrai.\nC) Vrai.\nD) Vrai." },
+      { id:"QE2-Q9", source:"QE2 — Question 9", question:"Homo sapiens sapiens :", options:["A) est apparu il y a environ 40 000 ans","B) est divisé en plusieurs races différenciables par leur génome","C) est la seule race existant actuellement sur Terre","D) n’a jamais rencontré l’Homme de Néandertal","E) a coexisté avec d’autres races humaines dans le passé"], correct:[0,2,4], explanation:"A) Vrai.\nC) Vrai.\nE) Vrai." },
+      { id:"QE2-Q10", source:"QE2 — Question 10", question:"L’apparition de nouvelles espèces dépend de :", options:["A) mutations génétiques","B) la pression de l’environnement","C) la disponibilité des ressources alimentaires","D) modifications de la couleur de peau","E) d’une force surnaturelle"], correct:[0,1,2], explanation:"A) Vrai.\nB) Vrai.\nC) Vrai." },
+      { id:"QE2-Q11", source:"QE2 — Question 11", question:"Paléopathologie via fragments osseux : quelles pathologies ?", options:["A) les épilepsies","B) l’ulcère gastrique","C) des maladies infectieuses","D) des rhumatismes","E) le SIDA"], correct:[0,2,3], explanation:"A) Vrai.\nC) Vrai.\nD) Vrai." },
+      { id:"QE2-Q12", source:"QE2 — Question 12", question:"Quels indices ont permis de mettre en évidence les maladies préhistoriques ?", options:["A) les fossiles d’organes mous (intestins, estomac)","B) les papyrus","C) l’étude des coprolithes","D) le génome humain actuel","E) les traces observées sur les os"], correct:[2,3,4], explanation:"C) Vrai.\nD) Vrai.\nE) Vrai." },
+      { id:"QE2-Q13", source:"QE2 — Question 13", question:"Les hommes préhistoriques :", options:["A) pratiquaient des trépanations","B) étaient atteints d’infections sexuellement transmissibles (syphilis)","C) avaient une espérance de vie élevée","D) pouvaient être atteints d’arthrose","E) considéraient la maladie comme une punition provoquée par une force divine"], correct:[0,1,3,4], explanation:"A) Vrai.\nB) Vrai.\nD) Vrai.\nE) Vrai." },
+      { id:"QE2-Q14", source:"QE2 — Question 14", question:"La médecine traditionnelle est pratiquée de nos jours par :", options:["A) les magnétiseurs en Europe","B) les chamans en Asie","C) les psychiatres","D) les guérisseurs aux philippines","E) des phytothérapeutes"], correct:[0,1,3], explanation:"A) Vrai.\nB) Vrai.\nD) Vrai." },
+      { id:"QE2-Q15", source:"QE2 — Question 15", question:"Principes utilisés par la médecine traditionnelle :", options:["A) l’examen clinique attentif","B) l’assimilation","C) la suggestion","D) l’utilisation de traitements empiriques","E) l’observation du patient"], correct:[1,2,3,4], explanation:"B) Vrai.\nC) Vrai.\nD) Vrai.\nE) Vrai." },
+      { id:"QE2-Q16", source:"QE2 — Question 16", question:"Basé sur un raisonnement médical traditionnel :", options:["A) imputation d’une maladie infectieuse aux péchés commis","B) guérison par pénitence et prière (pèlerinage…) pour réparer la faute","C) scanner pour mettre en évidence l’origine d’une douleur","D) soigner une tumeur à l’aide d’un objet magnétisé","E) rechercher l’origine d’une pathologie psychiatrique"], correct:[0,1,3], explanation:"A) Vrai.\nB) Vrai.\nD) Vrai." },
+      { id:"ACC-2021-PACES-Q42", source:"ACC 2021 PACES — Question 42", question:"Les Hommes du Néandertal :", options:["A) appartiennent à la race des Hommes contemporains","B) peuvent être identifiés parmi les humains vivant actuellement","C) ont inséré une partie de leur génome dans celui de l'Homme moderne actuel","D) peuvent être considérés comme appartenant aux races humaines"], correct:[2,3], explanation:"C) Vrai.\nD) Vrai." },
+      { id:"ACC-2021-PACES-Q43", source:"ACC 2021 PACES — Question 43", question:"L'identification des maladies évoluant durant la préhistoire conduit à utiliser comme support(s) :", options:["A) des fragments osseux","B) des pollens","C) des coprolites","D) le génome humain actuel"], correct:[0,1,2,3], explanation:"A) Vrai.\nB) Vrai.\nC) Vrai.\nD) Vrai." },
+      { id:"ACC-2021-PACES-Q44", source:"ACC 2021 PACES — Question 44", question:"Médecine(s) traditionnelle(s) ancestrale(s) existant encore de nos jours :", options:["A) le chamanisme","B) le magnétisme","C) l'ostéopathie","D) l'iridologie"], correct:[0,1], explanation:"A) Vrai.\nB) Vrai." },
+      { id:"ACC-2020-Q76", source:"ACC 2020 — Question 76", question:"Le développement de la vie sur Terre est caractérisé par :", options:["A) l'association de molécules","B) la sélection initiée par la contrainte environnementale","C) l'intervention du hasard","D) un équilibre fragile associant facteurs physiques et composés organiques et minéraux"], correct:[0,1,2,3], explanation:"A) Vrai.\nB) Vrai.\nC) Vrai.\nD) Vrai." },
+      { id:"ACC-2020-Q78", source:"ACC 2020 — Question 78", question:"Durant la préhistoire, les maladies étaient :", options:["A) essentiellement infectieuses","B) considérées comme d'origine surnaturelle","C) traitées le plus souvent par empirisme","D) abordées en référence au principe d'assimilation"], correct:[0,1,2,3], explanation:"A) Vrai.\nB) Vrai.\nC) Vrai.\nD) Vrai." },
+      { id:"ACC-2019-Q47", source:"ACC 2019 — Question 47", question:"L'humanité contemporaine est :", options:["A) composée de plusieurs races","B) susceptible d'évoluer physiologiquement","C) l'objet de nombreuses mutations génétiques","D) confrontée à un risque accru de stérilité"], correct:[1,2,3], explanation:"B) Vrai.\nC) Vrai.\nD) Vrai." },
+      { id:"ACC-2018-Q44", source:"ACC 2018 — Question 44", question:"Ancêtres directs/indirects (partiels) de l'Homme contemporain identifiables :", options:["A) le Purgatorius","B) l'Homme de Néandertal","C) le Gorille","D) l'Homo habilis"], correct:[0,1,3], explanation:"A) Vrai.\nB) Vrai.\nD) Vrai." },
+      { id:"ACC-2018-Q45", source:"ACC 2018 — Question 45", question:"Maladie(s) identifiée(s) durant la préhistoire :", options:["A) la syphilis","B) la tuberculose","C) les neuropathies centrales (épilepsie)","D) le S.I.D.A."], correct:[0,1,2], explanation:"A) Vrai.\nB) Vrai.\nC) Vrai." },
+      { id:"ACC-2017-Q42", source:"ACC 2017 — Question 42", question:"Séquence d'apparition/descendance :", options:["A) procaryotes → eucaryotes → arthropodes → insectes","B) procaryotes → eucaryotes → arthropodes → mammifères","C) eucaryotes → procaryotes → vertébrés → insectes","D) eucaryotes → procaryotes → vertébrés → mammifères"], correct:[0], explanation:"A) Vrai." },
+      { id:"ACC-2017-Q43", source:"ACC 2017 — Question 43", question:"Maladies préhistoriques identifiées grâce à :", options:["A) fragments osseux préhistoriques","B) génome de bactéries contemporaines de l'Homme préhistorique","C) génome de l'Homme moderne","D) excréments humains fossilisés"], correct:[0,2,3], explanation:"A) Vrai.\nC) Vrai.\nD) Vrai." },
+      { id:"ACC-2016-Q44", source:"ACC 2016 — Question 44", question:"L'évolution de la vie sur Terre est :", options:["A) la conséquence de nombreuses combinaisons aléatoires","B) organisée selon un schéma euclidien","C) caractérisée par une dynamique sélective","D) initialement conditionnée par le hasard"], correct:[0,2,3], explanation:"A) Vrai.\nC) Vrai.\nD) Vrai." },
+      { id:"ACC-2016-Q45", source:"ACC 2016 — Question 45", question:"Une démarche médicale empirique consiste :", options:["A) observer cliniquement des effets positifs/négatifs après ingestion d'une substance","B) comparer via méthode épidémiologique l'effet d'un remède supposé","C) tester une molécule en laboratoire","D) doser un métabolite toxique dans les liquides biologiques"], correct:[0], explanation:"A) Vrai." },
+      { id:"ACC-2015-Q42", source:"ACC 2015 — Question 42", question:"Facteur(s) ayant favorisé l’émergence de la vie sur Terre :", options:["A) le froid absolu","B) la chaleur","C) le rayonnement cosmique","D) le champ magnétique terrestre"], correct:[1,2,3], explanation:"B) Vrai.\nC) Vrai.\nD) Vrai." },
+      { id:"ACC-2015-Q43", source:"ACC 2015 — Question 43", question:"Les races humaines sur Terre :", options:["A) ont évolué sous la pression environnementale","B) se comptent par dizaines de nos jours","C) sont caractérisées par la couleur de la peau","D) n’ont jamais coexisté"], correct:[0], explanation:"A) Vrai." }
+    ]
+  },
+  "antique": {
+    icon: "🏛️", title: "Médecine Antique",
+    db: [
+      { id: "QE3-Q1", source: "QE3 — Question 1", question: "La pratique médicale au Proche et Moyen-Orient 5000 ans avant notre ère se distingue par :", options: ["A) l’assimilation de la maladie au péché (médecine religieuse)","B) la punition du guérisseur en cas d’échec (et la récompense en cas de réussite)","C) l’apparition de l’ophtalmologie","D) le risque de poursuites judiciaires par les proches du patient en cas d’erreur thérapeutique","E) l’utilisation de traitement empiriques aux effets non-validés"], correct: [0, 1, 4], explanation: "A) VRAI.\nB) VRAI.\nE) VRAI." },
+      { id: "QE3-Q2", source: "QE3 — Question 2", question: "Durant l’Egypte ancienne :", options: ["A) des actions de prévention permettaient de maintenir les travailleurs en bonne santé pour leur bien être intrinsèque","B) certains papyrus témoignent l’efficacité de nombreux traitements anti-infectieux","C) les médecins pouvaient également être vétérinaires ou architectes","D) les médecins accompagnient les armées pour maintenir les soldats en bonne santé","E) les médecins réalisaient déjà des opérations de la cataracte"], correct: [2, 3, 4], explanation: "C) VRAI.\nD) VRAI.\nE) VRAI." },
+      { id: "QE3-Q3", source: "QE3 — Question 3", question: "Le scorbut peut être soigné par consommation de :", options: ["A) vitamine C","B) tisanes au gingembre","C) ail","D) raifort","E) citron"], correct: [0, 2, 3, 4], explanation: "A) VRAI.\nC) VRAI.\nD) VRAI.\nE) VRAI." },
+      { id: "QE3-Q4", source: "QE3 — Question 4", question: "La présence de médecins au sein des armées permet :", options: ["A) de contenir les éventuelles infections chez les soldats","B) de garantir la bonne santé des militaires","C) d’éviter les combats","D) de soigner les blessés entre les combats","E) de maintenir une force de combat"], correct: [0, 1, 3, 4], explanation: "A) VRAI.\nB) VRAI.\nD) VRAI.\nE) VRAI." },
+      { id: "QE3-Q5", source: "QE3 — Question 5", question: "La médecine traditionnelle grecque antique est représentée par plusieurs dieux parmi lesquels :", options: ["A) Hygie incarnait la prévention, la santé et la propreté","B) Panacée incarnait la guérison et les remèdes","C) Machaon et Podaline incarnaient la chirurgie","D) Medicos incarnait la médecine","E) Ethicos incarnait l’éthique médicale"], correct: [0, 1, 2], explanation: "A) VRAI.\nB) VRAI.\nC) VRAI." },
+      { id: "QE3-Q6", source: "QE3 — Question 6", question: "La médecine hippocratique est caractérisée par :", options: ["A) l’instauration de principes ethniques visant à soigner uniquement certains patients","B) la dissociation de la maladie et du péché","C) des principes déontologiques incompatibles avec les dépassements d’honoraires imposés par certains spécialistes","D) l’examen clinique du patient visant à orienter le diagnostic du médecin vers un traitement adapté","E) la description de maladies d’origine professionnelle (saturnisme chez les potiers)"], correct: [1, 2, 3, 4], explanation: "B) VRAI.\nC) VRAI.\nD) VRAI.\nE) VRAI." },
+      { id: "QE3-Q7", source: "QE3 — Question 7", question: "La Médecine égyptienne antique est caractérisée par :", options: ["A) la description d’opérations de la cataracte","B) la mise en place d’une médecine professionnelle","C) l’utilisation des premiers antibiotiques","D) la description et l’extraction de nombreux principes actifs","E) une pluripotence des compétences"], correct: [0, 1, 4], explanation: "A) VRAI.\nB) VRAI.\nE) VRAI." },
+      { id: "QE3-Q8", source: "QE3 — Question 8", question: "La Médecine égyptienne antique se distingue par l’apparition de nombreuses spécialités. Quelle(s) nouvelle(s) spécialités est (sont) apparue(s) ?", options: ["A) la pneumologie","B) la chirurgie cardiaque","C) la gastro-entérologie","D) la psychiatrie","E) la chirurgie nasale"], correct: [0, 2], explanation: "A) VRAI.\nC) VRAI." },
+      { id: "QE3-Q9", source: "QE3 — Question 9", question: "Hippocrate est connu pour des aphorismes issus d’observations encore d’actualité. Quelle(s) observation(s) actuelle(s) confirment ces aphorismes ?", options: ["A) les déportés des camps de concentrations mouraient s’ils étaient nourris trop rapidement","B) un adulte atteint subitement de pertes de connaissance peut être atteint d’épilepsie tardive","C) une personne atteinte de tuberculose peut présenter des déformations osseuses","D) la consommation d’agrumes évite le déchaussement des dents","E) une perte de poids rapide nécessite une renutrition lente et progressive"], correct: [0, 2], explanation: "A) VRAI.\nC) VRAI." },
+      { id: "QE3-Q10", source: "QE3 — Question 10", question: "La Médecine Romaine se distingue par :", options: ["A) la remise en question régulière des données médicales par des médecins comme Galien","B) des soins prodigués uniquement aux plus riches","C) la mise en place de la médecine du travail","D) la mise en place de structures sanitaires (égouts, latrines)","E) une médecine militaire développée"], correct: [3, 4], explanation: "D) VRAI.\nE) VRAI." },
+      { id: "QE3-Q11", source: "QE3 — Question 11", question: "Parmi ces molécules, laquelle (lesquelles) peu(ven)t provoquer une pollution à des distances très éloignées ?", options: ["A) l’uranium radioactif","B) le plomb","C) l’agent orange (PCB)","D) le cuivre","E) aucune de ces molécules"], correct: [0, 1, 2], explanation: "A) VRAI.\nB) VRAI.\nC) VRAI." },
+      { id: "QE3-Q12", source: "QE3 — Question 12", question: "Le plomb :", options: ["A) était présent dans la vaisselle des Romains","B) est un stimulant intellectuel","C) a provoqué des cancers de l’estomac chez les dirigeants Romains","D) peut circuler jusqu’en Antarctique","E) est un marqueur de l’activité industrielle"], correct: [0, 3, 4], explanation: "A) VRAI.\nD) VRAI.\nE) VRAI." },
+      { id: "ACC-2021-PACES-Q45", source: "ACC 2021 PACES — Question 45", question: "Principe(s) de Médecine Grecque antique encore d'actualité aujourd'hui :", options: ["A) l'observation","B) la scarification","C) l'interrogatoire","D) l'examen clinique"], correct: [0, 2, 3], explanation: "A) VRAI.\nC) VRAI.\nD) VRAI." },
+      { id: "ACC-2021-PACES-Q46", source: "ACC 2021 PACES — Question 46", question: "Le plomb peut :", options: ["A) être à l'origine du saturnisme","B) être un marqueur d'activité industrielle","C) polluer l'environnement à distance de son utilisation","D) guérir certaines maladies"], correct: [0, 1, 2], explanation: "A) VRAI.\nB) VRAI.\nC) VRAI." },
+      { id: "ACC-2019-Q48", source: "ACC 2019 — Question 48", question: "Le saturnisme, dont une partie de la population souffrait dans l'antiquité :", options: ["A) est la conséquence d'une intoxication par le plomb","B) peut être dû à la vaisselle utilisée","C) provoque une dégradation du système nerveux central","D) est favorisé par l'ingestion de mercure"], correct: [0, 1, 2], explanation: "A) VRAI.\nB) VRAI.\nC) VRAI." },
+      { id: "ACC-2018-Q46", source: "ACC 2018 — Question 46", question: "Durant l'antiquité, la carence en vitamine C ou scorbut pouvait être prévenue par la consommation :", options: ["A) de raifort","B) d'épinards","C) d'oignons","D) de pommes de terre"], correct: [0, 2], explanation: "A) VRAI.\nC) VRAI." },
+      { id: "ACC-2018-Q47", source: "ACC 2018 — Question 47", question: "Les contemporains d'Hippocrate considéraient que ce qu'ils qualifiaient d'asthme pouvait rendre bossu, par quel(s) mécanisme(s) ?", options: ["A) infectieux","B) destruction osseuse vertébrale","C) port de charges lourdes","D) obésité"], correct: [0, 1], explanation: "A) VRAI.\nB) VRAI." },
+      { id: "ACC-2018-Q48", source: "ACC 2018 — Question 48", question: "Le plomb est :", options: ["A) un toxique","B) un marqueur d'activité industrielle","C) peu volatile","D) présent dans la vaisselle dans l’antiquité"], correct: [0, 1, 3], explanation: "A) VRAI.\nB) VRAI.\nD) VRAI." },
+      { id: "ACC-2017-Q44", source: "ACC 2017 — Question 44", question: "A propos de la médecine romaine :", options: ["A) Imhotep est le plus célèbre des médecins de l'empire romain","B) les romains furent les premiers à installer des égouts dans leurs villes","C) les romains ont beaucoup investi dans la médecine militaire","D) le saturnisme pourrait avoir contribué à la décadence de l'empire romain"], correct: [1, 2, 3], explanation: "B) VRAI.\nC) VRAI.\nD) VRAI." },
+      { id: "ACC-2015-Q45", source: "ACC 2015 — Question 45", question: "Principe(s) justifiant une Médecine militaire :", options: ["A) maintenir des soldats en bonne santé","B) éviter la propagation de maladies contagieuses au sein des troupes","C) réduire la mortalité et la morbidité à l’issue des combats","D) pallier les incohérences de la Médecine civile"], correct: [0, 1, 2], explanation: "A) VRAI.\nB) VRAI.\nC) VRAI." },
+      { id: "ACC-2015-Q46", source: "ACC 2015 — Question 46", question: "L’éthique médicale :", options: ["A) est incompatible avec le dépassement d’honoraires non justifié","B) consiste à prodiguer soins à l’indigent","C) implique le respect de toutes les religions","D) permet de dénoncer un Médecin qui met en danger la vie de ses patients"], correct: [0, 1, 2, 3], explanation: "A) VRAI.\nB) VRAI.\nC) VRAI.\nD) VRAI." },
+      { id: "ACC-2014-Q41", source: "ACC 2014 — Question 41", question: "Les principes édictés par Hippocrate sont à l’origine :", options: ["A) de l’examen clinique moderne","B) du serment rassemblant les principes de déontologie médicale","C) de la séparation des aspects médicaux des concepts religieux","D) des premiers traitements médicamenteux modernes"], correct: [0, 1, 2], explanation: "A) VRAI.\nB) VRAI.\nC) VRAI." },
+      { id: "ACC-2014-Q46", source: "ACC 2014 — Question 46", question: "Dans la médecine grecque antique, quelle(s) fille(s) d’Asclépios (dieu de la médecine) évoquai(en)t les différentes facettes de l’art médical ?", options: ["A) Asprone, déesse des médicaments","B) Hygie, déesse de la prévention et de l’hygiène","C) Panacée, déesse soignant grâce à des remèdes à base de plantes","D) Orthopas, déesse de la chirurgie, notamment orthopédique"], correct: [1, 2], explanation: "B) VRAI.\nC) VRAI." },
+      { id: "ACC-2013-Q44", source: "ACC 2013 — Question 44", question: "La Médecine grecque moderne (hippocratique) a rompu avec les principes antiques. Quel(s) nouveau(x) principe(s) hippocratique(s) apparaissent dès lors ?", options: ["A) Apparition des principes éthiques (soins aux indigents)","B) Apparition de l’examen clinique attentif (observation, interrogatoire...)","C) Utilisation des examens biologiques","D) Apparition d’un lien étroit entre Médecine et croyances religieuses (maladie = conséquence des péchés)"], correct: [0, 1], explanation: "A) VRAI.\nB) VRAI." },
+      { id: "ACC-Q45", source: "ACC — Question 45", question: "La Médecine romaine se distingue par :", options: ["A) la mise en place d’actions de santé publique (égouts, latrines, fontaines)","B) le développement de la médecine militaire","C) l’apparition du diagnostic médical","D) la lutte contre les maladies professionnelles"], correct: [0, 1], explanation: "A) VRAI.\nB) VRAI." },
+      { id: "ACC-2012-Q49", source: "ACC 2012 — Question 49", question: "Dans la médecine grecque antique, la (les) fille(s) d’Asclépios (dieu de la médecine) évoquai(en)t différentes facettes de l’art médical. Elle(s) s’appelai(en)t :", options: ["A) Aspirione, déesse des médicaments","B) Hygie, déesse de la prévention et de l’hygiène","C) Panacée, déesse prodiguant les remèdes par les plantes","D) Orthopedia, déesse de la chirurgie, notamment orthopédique"], correct: [1, 2], explanation: "B) VRAI.\nC) VRAI." },
+      { id: "ACC-2011-Q44", source: "ACC 2011 — Question 44", question: "Les principes édictés par Hippocrate sont à l’origine :", options: ["A) de l’examen clinique moderne","B) du serment rassemblant les principes de déontologie médicale","C) de la séparation de l’art médical des concepts religieux","D) des premiers traitements médicamenteux modernes"], correct: [0, 1, 2], explanation: "A) VRAI.\nB) VRAI.\nC) VRAI." }
+    ]
+  },
+  "handicap_societe": {
+    icon: "♿", title: "Handicap et société",
+    db: [
+      { id: "QE8-Q1", source: "QE 8 — Question 1", question: "Concernant le handicap en France :", options: ["A) il concerne uniquement les individus atteints de déficiences physiques", "B) il est évalué en fonction d'un barème unique défini par l'Etat", "C) la personne handicapée est majoritairement prise en charge par sa famille", "D) l'organisation de notre société peut augmenter le nombre de handicapés", "E) il peut être provoqué par une déficience mentale"], correct: [3, 4], explanation: "A. Faux : le handicap peut concerner toute personne selon la situation.\nB. Faux : il existe de nombreux barèmes en France.\nC. Faux : En France, les handicapés sont pris en charge par la société.\nD. Vrai.\nE. Vrai." },
+      { id: "QE8-Q2", source: "QE 8 — Question 2", question: "Le ressenti de l'incapacité à travailler est :", options: ["A) dépendant de l'organisation de la société", "B) always corrélé à l'importance des déficiences", "C) dépendant de la personnalité", "D) parfois provoqué par une lombalgie", "E) dans certains cas lié à l'incapacité de s'intégrer dans le travail"], correct: [0, 2, 3, 4], explanation: "A. Vrai.\nB. Faux : il existe des grands handicapés qui se sentent capables de travailler.\nC. Vrai.\nD. Vrai.\nE. Vrai : les déficients mentaux légers sont incapables d'effectuer certaines taches techniques." },
+      { id: "QE8-Q3", source: "QE 8 — Question 3", question: "Stephen Hawkin :", options: ["A) était atteint du syndrome de lock-in", "B) était atteint d'une maladie neuro-dégénérative", "C) a rédigé « le scaphandre et le papillon »", "D) était incapable d'effectuer une activité professionnelle", "E) était un scientifique accompli"], correct: [1, 4], explanation: "A. Faux : Stephen Hawkin était atteint d'une maladie neuro-dégénérative.\nB. Vrai.\nC. Faux : ce livre a été écrit par une personne atteinte du syndrome de Lock-in.\nD. Faux : Stephen Hawkins était un scientifique accompli mondialement connu.\nE. Vrai." },
+      { id: "ACC-Q51", source: "ACC 2019 — Question 51", question: "Le handicap peut être :", options: ["A) physique", "B) psychique", "C) financier", "D) social"], correct: [0, 1, 3], explanation: "A. VRAI.\nB. VRAI.\nC. FAUX : l'aspect financier n'est pas pris en compte dans le handicap.\nD. VRAI." },
+      { id: "ACC-Q48", source: "ACC 2016 — Question 48", question: "Le niveau de handicap ressenti est déterminé par :", options: ["A. l'état psychologique et la personnalité du patient", "B. l'incapacité à réaliser certaines tâches", "C. le métier exercé", "D. la culture d'appartenance"], correct: [0, 1, 2, 3], explanation: "A. VRAI.\nB. VRAI.\nC. VRAI : certains métiers se sont complexifiés rendant certaines personnes plus difficiles à intégrer dans le travail.\nD. VRAI : le handicap n'est pas pris en charge de la même manière en Europe et en Afrique où les cultures diffèrent." },
+      { id: "ACC-Q50", source: "ACC 2015 — Question 50", question: "L'expression et l'importance du handicap ressenti sont dépendants :", options: ["A. de la culture à laquelle appartient le patient", "B. des caractéristiques du métier exercé", "C. l'incapacité d'exercer certaines activités", "D. des éventuels avantages financiers obtenus"], correct: [0, 1, 2, 3], explanation: "A. VRAI : le handicap n'est pas pris en charge de la même manière en Europe et en Afrique où les cultures diffèrent.\nB. VRAI.\nC. VRAI.\nD. VRAI : certaines personnes demandent à devenir handicapé pour toucher l'allocation d'adulte handicapé car ils se sentent incapables de travailler." }
+    ]
+  },
+  "mutations_environnement": {
+    icon: "🌍", title: "Mutations et environnement",
+    db: [
+      { id: "QE7-Q1", source: "QE 7 — Question 1", question: "Quel(s) est (sont) le(s) modificateur(s) de l'environnement qui a (ont) un impact potentiel sur la santé ?", options: ["A) les composés fossiles", "B) la réorganisation du travail (open spaces ...)", "C) l'augmentation de la biodiversité par l'homme", "D) certains minéraux", "E) le réchauffement climatique"], correct: [0, 1, 3, 4], explanation: "A. Vrai. \nB. Vrai: la tertiairisation et la désindustrialisation modifient le type de pathologies affectant l'homme. Ce sont des facteurs psycho-sociaux. \nC. Faux: la diminution de la biodiversité modifie la distribution et les caractéristiques des pathologies. \nD. Vrai. \nE. Vrai." },
+      { id: "QE7-Q2", source: "QE 7 — Question 2", question: "L'effet cancérogène d'une molécule est dépendant de :", options: ["A) la quantité de toxique exposé", "B) la durée d'exposition", "C) son instabilité chimique", "D) sa capacité à formater des adduits", "E) sa capacité à générer les radicaux libres"], correct: [0, 1, 2, 3, 4], explanation: "Toutes les propositions sont Vraies. \nB. Vrai: certains cancers peuvent être provoqués par des substances cumulées sur plusieurs années." },
+      { id: "QE7-Q3", source: "QE 7 — Question 3", question: "La modification de l'environnement :", options: ["A) est en grande partie due à l'activité humaine", "B) est responsable d'une modification de la distribution des maladies", "C) ne présente aucun risque pour l'Homme", "D) est liée au stockage hermétique des déchets issus de l'industrie chimique", "E) est liée à la dispersion de pesticides particulièrement rémanents"], correct: [0, 1, 4], explanation: "A. Vrai. \nB. Vrai: c'était le cas à Ephèse qui a subi une épidémie de paludisme suite à la déforestation. \nC. Faux: la réduction de la biodiversité présente un risque pour l'Homme. \nD. Faux: la modification de l'environnement est liée à la dispersion de molécules. \nE. Vrai." },
+      { id: "QE7-Q4", source: "QE 7 — Question 4", question: "L'évaluation de la toxicité des composés issus de la synthèse chimique est :", options: ["A) mesurée par la dose létale à 50% (DL50)", "B) réalisée pour toute nouvelle molécule toxique avant sa commercialisation", "C) basée sur des expositions de rongeurs sur plusieurs générations", "D) efficace pour les molécules toxiques à très faible dose", "E) est efficace pour identifier les effets cumulatifs"], correct: [0], explanation: "A. Vrai: il s'agit de la dose tuant 50% des rats. \nB. Faux: les tests ne concernent que quelques molécules sur les 100 000 produites. \nC. Faux: les rats sont exposés pendant seulement 2 ans. \nD. Faux: les toxiques à très faibles doses ne peuvent pas être gérés. \nE. Faux: les effets cumulatifs sont inconnus avec l'évaluation de la toxicité." },
+      { id: "QE7-Q5", source: "QE 7 — Question 5", question: "Les nanoparticules :", options: ["A) ne présentent aucun risque cancérogène", "B) sont susceptibles de modifier l'ADN", "C) sont totalement inertes", "D) sont présentes dans certains produits cosmétiques", "E) ont une structure de l'ordre du nanomètre"], correct: [1, 3, 4], explanation: "A. Faux: ils présentent un risque cancérogène. \nB. Vrai. \nC. Faux: ce sont des particules très réactives. \nD. Vrai. \nE. Vrai." },
+      { id: "QE7-Q6", source: "QE 7 — Question 6", question: "A propos de l'épidémiologie des cancers en France :", options: ["A) le nombre de cancers diagnostiqués par an a doublé depuis 35 ans", "B) le nombre de cancers des voies aérodigestives supérieures (œsophage, estomac) est en augmentation", "C) les cancers hormono-dépendants (sein, prostate) ont augmenté ces trente dernières années", "D) l'amélioration des dépistages explique en partie leur augmentation", "E) l'accroissement de la population est un facteur explicatif de leur augmentation"], correct: [0, 2, 3, 4], explanation: "A. Vrai. \nB. Faux: ce type de cancer est en diminution. \nC. Vrai. \nD. Vrai. \nE. Vrai." },
+      { id: "QE7-Q7", source: "QE 7 — Question 7", question: "La fumée de tabac a pour caractéristiques :", options: ["A) d'être responsable d'une augmentation de l'apparition de cancers bronchiques chez les femmes", "B) de contenir des hydrocarbures aromatiques polycycliques, de l'arsenic ou encore du cadmium", "C) d'avoir ses effets cancérogènes diminués en présence de radon", "D) d'être responsable de troubles cardiovasculaires", "E) de présenter un risque uniquement individuel"], correct: [0, 1, 3], explanation: "A. Vrai: car la fréquence de fumeuses a augmenté. \nB. Vrai. \nC. Faux: ses effets cancérogènes sont augmentés en présence de radon. \nD. Vrai. \nE. Faux: la fumée de tabac augmente de 20% le risque de cancer chez un non-fumeur exposé." },
+      { id: "QE7-Q8", source: "QE 7 — Question 8", question: "Facteur(s) impliqué(s) dans la cancérogénèse :", options: ["A) (Proposition initialement manquante, comptée vraie en correction)", "B) facteurs génétiques de prédisposition", "C) l'exposition à des molécules instables", "D) la pollution environnementale", "E) les ondes générées par téléphones portables"], correct: [0, 1, 2, 3], explanation: "B. Vrai. \nC. Vrai: par exemple l'amiante. \nD. Vrai: les HAP sont des polluants environnementaux responsables de cancers bronchiques. \nE. Faux: à ce jour, les effets cancérigènes des ondes des téléphones portables ne sont pas scientifiquement validés." },
+      { id: "QE7-Q9", source: "QE 7 — Question 9", question: "Le(s) maladie(s) due(s) à la modification de l'environnement sont :", options: ["A) le paludisme provoqué par la déforestation des bords de mer", "B) les intoxications dues au relargage de pesticides dans les nappes phréatiques", "C) les leucémies provoquées par les champs électro-magnétiques des ondes wifi", "D) les cancers de l'estomac dus à la consommation de poulet élevé sous antibiotiques", "E) l'infarctus du myocarde généré par le dystress"], correct: [0, 1, 4], explanation: "A. Vrai: cela provoque l'apparition de lagunes d'eau douces favorables au développement des moustiques vecteurs. \nB. Vrai. \nC. Faux: les effets des champs électromagnétiques ne sont pas avérés. \nD. Faux: ce cas de figure n'a pas été décrit. \nE. Vrai." },
+      { id: "QE7-Q10", source: "QE 7 — Question 10", question: "Les perturbateurs endocriniens (dioxines, PCB) dispersés dans l'environnement sont potentiellement liés à l'augmentation :", options: ["A) de certains cancers", "B) de maladies infectieuses", "C) de l'homosexualité", "D) des problèmes de conception", "E) de l'efficience du système immunitaire"], correct: [0, 1, 3], explanation: "A. Vrai. \nB. Vrai: les perturbateurs endocriniens réduisent l'efficacité du système immunitaire. \nC. Faux: ce critère est aberrant. \nD. Vrai. \nE. Faux: l'efficience du système immunitaire est réduite par les dioxines." },
+      { id: "QE7-Q11", source: "QE 7 — Question 11", question: "Les perturbateurs endocriniens sont :", options: ["A) rémanents et stables", "B) rapidement éliminés par l'organisme", "C) des polluants environnementaux", "D) hautement volatiles", "E) chimiquement proches des estrogènes"], correct: [0, 2, 3, 4], explanation: "A. Vrai. \nB. Faux: ces molécules se stockent dans les graisses où elles persistent. \nC. Vrai. \nD. Vrai. \nE. Vrai." },
+      { id: "QE7-Q12", source: "QE 7 — Question 12", question: "Concernant la fumée de tabac :", options: ["A) elle contient plusieurs milliers de molécules cancérogènes", "B) les fumeurs représentent environ 30% de la population française", "C) elle provoque la mort de la moitié des fumeurs", "D) une exposition passive augmente de 20% le risque de cancer broncho-pulmonaire chez un non-fumeur", "E) elle est à l'origine de 200 décès par an"], correct: [0, 1, 2, 3], explanation: "A. Vrai: environ 4500 molécules. \nB. Vrai: les fumeurs représentent 25-30% de la population. \nC. Vrai. \nD. Vrai. \nE. Faux: 200 décès par jour." },
+      { id: "QE7-Q13", source: "QE 7 — Question 13", question: "Les problèmes de fertilité :", options: ["A) sont en diminution", "B) peut en partie s'expliquer par la division par 2 du nombre de spermatozoïdes", "C) peuvent être corrélés à des facteurs psychologiques", "D) concerne 50% de la population", "E) peuvent être associés aux conditions de travail"], correct: [1, 2, 4], explanation: "A. Faux: les problèmes de fertilité sont en augmentation. \nB. Vrai. \nC. Vrai. \nD. Faux: les problèmes concernent environ 25% de la population. \nE. Vrai." },
+      { id: "QE7-Q14", source: "QE 7 — Question 14", question: "L'hypofertilité ou la stérilité peuvent être favorisées par :", options: ["A) une alimentation excessive de tous les légumes", "B) le dystress", "C) le travail de nuit", "D) l'exposition aux rayonnements ionisants", "E) l'exposition à certains solvants (éthers de glycol)"], correct: [1, 2, 3, 4], explanation: "A. Faux: une consommation excessive de légumes traités par les pesticides peut avoir un effet... mais non-traités n'aura pas d'impact. \nB, C, D, E. Vrai." },
+      { id: "QE7-Q15", source: "QE 7 — Question 15", question: "Les maladies infectieuses émergentes peuvent être favorisées par :", options: ["A) la pauvreté", "B) un système de soins dégradé", "C) des émonctoires altérées (égouts engorgés)", "D) la modification de l'environnement", "E) une alimentation riche en glucides"], correct: [0, 1, 2, 3], explanation: "A, B, C, D. Vrai. \nE. Faux: Une nourriture riche en glucides est plutôt à l'origine de maladies de surcharge (obésité, diabète)." },
+      { id: "ACC-2017-Q46", source: "ACC 2017 — Question 46", question: "A propos du tabac :", options: ["A. la fumée de tabac est responsable de 20 000 cancers bronchiques par an en France", "B. la fumée de tabac contient 4500 molécules dont beaucoup sont toxiques", "C. l'exposition passive à la fumée de tabac accroît de 20% l'incidence de survenue d'un cancer chez un non-fumeur", "D. l'arrêt du tabagisme chez un fumeur permet de retrouver une espérance de vie normale en moins d'un an"], correct: [0, 1, 2], explanation: "A, B, C. VRAI. \nD. FAUX: il faut avoir arrêté de fumer au moins 20 ans pour retrouver l'espérance de vie d'un non-fumeur." },
+      { id: "ACC-2017-Q47", source: "ACC 2017 — Question 47", question: "La fréquence des cancers en France a augmenté depuis quelques années pour les cancers :", options: ["A. de la prostate", "B. de l'œsophage", "C. du sein", "D. de l'estomac"], correct: [0, 2], explanation: "A. VRAI. \nB. FAUX: les cancers de l'œsophage sont en diminution. \nC. VRAI. \nD. FAUX: les cancers de l'estomac sont en diminution." },
+      { id: "ACC-2017-Q48", source: "ACC 2017 — Question 48", question: "A propos des maladies psycho-sociales :", options: ["A. le Workaholisme est le fait de consommer de l'alcool sur son lieu de travail", "B. le karoshi est la mort causée par un travail trop intense", "C. le burn out est un épuisement professionnel", "D. les maladies psycho-sociales peuvent survenir suite à des modifications de l'organisation du travail"], correct: [1, 2, 3], explanation: "A. FAUX: le workaholisme est l'intoxication par le travail. \nB, C, D. VRAI." },
+      { id: "ACC-2015-Q49", source: "ACC 2015 — Question 49", question: "Maladie(s) environnementale(s) mortelle(s) de nos jours :", options: ["A. le cancer du poumon provoqué par les particules fines issues des fumées d'échappement des véhicules", "B. l'infarctus du myocarde dû au travail", "C. la consommation de viande contenant des plombs de chasse à l'origine du cancer de l'estomac", "D. les champs magnétiques émis par des fours à micro-ondes provoquant des tumeurs cérébrales"], correct: [0, 1], explanation: "A, B. VRAI. \nC. FAUX: les cancers des voies digestives sont en diminution... De plus, le plomb provoque le saturnisme plutôt que des cancers. \nD. FAUX: l'effet cancérigène des ondes magnétiques n'est pas avéré." },
+      { id: "ACC-2014-Q42", source: "ACC 2014 — Question 42", question: "L'augmentation actuelle du nombre de cancers en France est liée à :", options: ["A. un meilleur dépistage", "B. un accroissement de la population en nombre", "C. un développement de l'agriculture dite biologique", "D. un vieillissement de la population"], correct: [0, 1, 3], explanation: "A, B, D. VRAI. \nC. FAUX: l'agriculture biologique n'est pas en relation avec l'augmentation des cancers car elle évite d'exposer les personnes à des substances toxiques." },
+      { id: "ACC-2014-Q49", source: "ACC 2014 — Question 49", question: "Quel(s) facteur(s) participe(nt) à l'accroissement de l'incidence des cancers ?", options: ["A. l'augmentation du dépistage", "B. le vieillissement de la population", "C. l'augmentation de la sensibilité des individus aux cancérigènes", "D. les faibles avancées dans le traitement du cancer"], correct: [0, 1], explanation: "A, B. VRAI. \nC. FAUX: la sensibilité aux cancérigènes n'augmente pas. \nD. FAUX: la rémission des personnes atteintes d'un cancer s'améliore." },
+      { id: "ACC-2011-Q46", source: "ACC 2011 — Question 46", question: "Les principaux mécanismes à l'origine de la modification de notre environnement sont :", options: ["A. la réduction de la biodiversité", "B. la destruction et le relargage des composés fossiles", "C. le stockage étanche de toxiques", "D. la dispersion des médicaments dans l'environnement (fleuves...)"], correct: [0, 1, 3], explanation: "A. VRAI. \nB. VRAI: les composés fossiles étant le pétrole, les gaz comme le CFC. \nC. FAUX: si le stockage d'un produit toxique est étanche, cela ne modifiera pas l'environnement. \nD. VRAI: la dispersion des estrogènes pollue les rivières américaines." }
+    ]
+  },
+  "xix_xx_siecle": {
+    icon: "🚂", title: "XIXe & 1ère moitié XXe",
+    db: [
+      { id:"QE6-Q1", source:"QE6 — Q1", question:"Concernant l’ordre d’apparition chronologique des progrès médicaux majeurs, quelles affirmations ci-dessous est (sont) vraie(s) ?", options:["A) la synthèse de l’aspirine est réalisée après la première vaccination","B) les premiers microscopes sont apparus après les cystoscopes","C) les premiers anesthésiques (éther, chloroforme) sont apparus après la vaccination","D) les antibiotiques ont été découverts avant le tensiomètre","E) la seringue a été développée avant les antibiotiques"], correct:[0, 2, 4], explanation:"A Vrai • B Faux • C Vrai • D Faux • E Vrai" },
+      { id:"QE6-Q2", source:"QE6 — Q2", question:"Le capital santé déplorable des jeunes soldats au XIXe siècle a conduit aux premières lois sociales sur la durée du travail. Quelle(s) règlementation(s) a (ont) été mise(s) en place ?", options:["A) l’interdiction de travailler avant l’âge de 18 ans","B) un temps de travail limité à 8 heures par jour pour les enfants de 8 à 12 ans","C) un temps de travail limité à 12 heures par jour pour les enfants de moins de 18 ans","D) un temps de travail limité à 15 heures par jour pour les adultes","E) au minimum 5 semaines de congés payés"], correct:[1], explanation:"A Faux • B Vrai • C Faux • D Faux • E Faux" },
+      { id:"QE6-Q3", source:"QE6 — Q3", question:"Avancée(s) scientifique(s) du XIXe siècle :", options:["A) découverte du bacille de la tuberculose (Koch)","B) développement du laryngoscope et du cystoscope","C) validation expérimentale de la théorie de la génération spontanée","D) développement de la seringue et de l’aiguille","E) développement de l’épidémiologie"], correct:[0, 1, 3, 4], explanation:"A Vrai • B Vrai • C Faux • D Vrai • E Vrai" },
+      { id:"QE6-Q4", source:"QE6 — Q4", question:"Institution(s) apparues au XIXe siècle :", options:["A) l’Organisation mondiale de la Santé","B) la Croix-Rouge","C) la Sécurité sociale","D) la Médecine du travail","E) Santé Publique France"], correct:[1], explanation:"A Faux • B Vrai • C Faux • D Faux • E Faux" },
+      { id:"QE6-Q5", source:"QE6 — Q5", question:"La théorie de la génération spontanée :", options:["A) repose sur des concepts erronés","B) est une découverte scientifique fondamentale","C) a permis de développer des thérapies révolutionnaires","D) s’opposait aux travaux de Pasteur","E) était défendue par certains scientifiques au XIXe siècle"], correct:[0, 3, 4], explanation:"A Vrai • B Faux • C Faux • D Vrai • E Vrai" },
+      { id:"QE6-Q6", source:"QE6 — Q6", question:"Louis Pasteur :", options:["A) utilisait une démarche empirique dans ses travaux sur la vaccination","B) a découvert la cellule","C) était un médecin du XIXe siècle","D) utilisait des techniques de chauffage pour atténuer la virulence des germes","E) a créé le vaccin contre la tuberculose"], correct:[3], explanation:"A Faux • B Faux • C Faux • D Vrai • E Faux" },
+      { id:"QE6-Q7", source:"QE6 — Q7", question:"Facteur(s) responsable(s) de l’explosion de l’alcoolisme au XIXe siècle :", options:["A) développement des transports (chemins de fer…)","B) augmentation de l’activité industrielle","C) conditions de travail difficiles","D) apparition des techniques de distillation","E) augmentation de la production individuelle d’alcool"], correct:[0, 1, 2], explanation:"A Vrai • B Vrai • C Vrai • D Faux • E Faux" },
+      { id:"QE6-Q8", source:"QE6 — Q8", question:"Les antibiotiques :", options:["A) ont été initialement identifiés par hasard","B) ont été initialement découverts avant la 1ère guerre mondiale","C) étaient utilisés durant la Seconde Guerre Mondiale","D) représentent la seule voie possible de lutte contre les agents infectieux","E) permettent de traiter la syphilis"], correct:[0, 1, 2, 4], explanation:"A Vrai • B Vrai • C Vrai • D Faux • E Vrai" },
+      { id:"QE6-Q9", source:"QE6 — Q9", question:"La pratique médicale du début du XXe siècle est marquée par :", options:["A) mise en évidence des hormones et des vitamines","B) radiographie des poumons pour détecter la tuberculose","C) traitements des cancers par radiothérapie","D) développement de la vaccination","E) diagnostic sérologique de la syphilis"], correct:[0, 1, 2, 3, 4], explanation:"A Vrai • B Vrai • C Vrai • D Vrai • E Vrai" },
+      { id:"QE6-Q10", source:"QE6 — Q10", question:"La Médecine du travail :", options:["A) consiste à promouvoir le bien-être physique, psychique et social des salariés","B) correspond essentiellement à une médecine de main d’œuvre","C) avait pour but initial d’identifier les salariés atteints de maladies contagieuses (tuberculose)","D) interfère avec la productivité des entreprises","E) a été mise en place après la seconde guerre mondiale"], correct:[0, 2, 4], explanation:"A Vrai • B Faux • C Vrai • D Faux • E Vrai" },
+      { id:"QE6-Q11", source:"QE6 — Q11", question:"La première guerre mondiale est à l’origine :", options:["A) des premières tentatives de réintégration des blessés et mutilés de guerre","B) des premières reconnaissances de maladies professionnelles","C) de séquelles importantes chez les soldats","D) du service du travail obligatoire (STO)","E) de la création de la croix rouge"], correct:[0, 1, 2], explanation:"A Vrai • B Vrai • C Vrai • D Faux • E Faux" },
+      { id:"QE6-Q12", source:"QE6 — Q12", question:"Les rayonnements ionisants permettent :", options:["A) de traiter certaines maladies","B) de lutter contre les maladies génétiques","C) d’améliorer le diagnostic médical","D) de guérir de nombreuses maladies dégénératives","E) d’améliorer le contenu du pronostic médical"], correct:[0, 2], explanation:"A Vrai • B Faux • C Vrai • D Faux • E Faux" },
+      { id:"ACC-2021-PACES-Q48", source:"ACC — 2021 PACES Q48", question:"L'alcoolisation de masse au XIXe siècle est la conséquence de :", options:["A) l'accroissement de l'efficacité de la production industrielle","B) l'amélioration des moyens de transports","C) la dégradation des conditions de vie dans les centres industriels","D) l'effet psychotrope de l'alcool"], correct:[0, 1, 2, 3], explanation:"A Vrai • B Vrai • C Vrai • D Vrai" },
+      { id:"ACC-2021-PACES-Q49", source:"ACC — 2021 PACES Q49", question:"La vaccination a pour principe(s) d'injecter un germe :", options:["A) virulent","B) modifié génétiquement","C) inoffensif","D) après exposition au chauffage"], correct:[2, 3], explanation:"A Faux • B Faux • C Vrai • D Vrai" },
+      { id:"ACC-2021-PACES-Q50", source:"ACC — 2021 PACES Q50", question:"La Médecine du Travail (Médecine et Santé au Travail) :", options:["A) est curative","B) est préventive","C) peut conduire à améliorer les conditions de travail","D) peut conduire à diagnostiquer certaines maladies"], correct:[1, 2, 3], explanation:"A Faux • B Vrai • C Vrai • D Vrai" },
+      { id:"ACC-2016-Q45", source:"ACC — 2016 Q45", question:"Une démarche médicale empirique consiste :", options:["A) à observer cliniquement des effets positifs ou négatifs, conséquence de l’ingestion d’une substance (ex : écorce bouillie…)","B) à comparer par une méthode épidémiologique l’effet d’un remède supposé","C) à tester une molécule en laboratoire","D) à doser un métabolite toxique dans les liquides biologiques"], correct:[0], explanation:"A Vrai • B Faux • C Faux • D Faux" },
+      { id:"ACC-2012-Q47", source:"ACC — 2012 Q47", question:"Concernant l’ordre d’apparition chronologique des progrès médicaux majeurs, quelle(s) affirmation(s) est (sont) vraie(s) ?", options:["A) la première vaccination est apparue avant les antibiotiques","B) les premiers anesthésiques (éther, chloroforme) sont apparus avant les antibiotiques","C) la radiologie médicale est apparue avant les seringues","D) la synthèse de l’aspirine est apparue avant la radiothérapie"], correct:[0, 1, 3], explanation:"A Vrai • B Vrai • C Faux • D Vrai" }
+    ]
+  }
+};
+
+// Variables d'état
+let currentDBKey = '';
+let questionsDB = [];
+let mode = "full"; // "full", "retry", "exam" ou "global_retry"
+let currentQIndex = 0; 
+let score = 0; 
+let locked = false; 
+let wrongSnapshots = [];
+let wrongIds = new Set();
+let timerEnabled = true; 
+let examTimeLeft = 900; 
+let qTimeLeft = 90; 
+let qTimerId = null; 
+let sessionStartTime = null;
+let userAnswers = []; // Stocke les réponses pour chaque question de la session en cours
+
+const colors = ['indigo', 'rose', 'ocean', 'violet', 'sunset', 'emerald', 'amber', 'teal', 'fuchsia', 'slate'];
+let currentColorIndex = 0;
+
+// Mapping des éléments HTML
+const el = {};
+['welcomeScreen', 'dashboardScreen', 'quizScreen', 'endScreen', 'hubGrid', 'dashCourseTitle', 
+ 'statGames', 'statAvg', 'statLast', 'startFullBtn', 'resetStatsBtn', 'orderSelect', 'importJsonBtn', 
+ 'jsonUpload', 'startExamBtn', 'startGlobalRetryBtn', 'globalMistakesCount', 'mainTitle', 'subTitle', 
+ 'timerBadge', 'timerText', 'scoreBadge', 'liveScore', 'liveTotal', 'themeBtn', 'colorBtn', 
+ 'progressBar', 'qSource', 'qText', 'optionsContainer', 'explanationBox', 'expStatus', 'expText', 
+ 'prevBtn', 'skipBtn', 'validateBtn', 'nextBtnExam', 'nextBtn', 'finishExamBtn', 'hintText', 'endTitle', 'endSummary', 'endTotalTime', 
+ 'wrongBlock', 'wrongList', 'exportBtn', 'backHomeEndBtn', 'retryWrongBtn', 'restartBtn', 
+ 'historySection', 'historyList', 'appSidebar', 'sidebarTracker', 'quizSidebar', 'quitQuizBtn', 'backToHubBtn'].forEach(id => {
+  el[id] = document.getElementById(id);
+});
+el.screens = document.querySelectorAll('.screen');
+
+// --- GESTION DES ERREURS GLOBALES (LOCALSTORAGE) ---
+function getGlobalMistakes() {
+  try { return JSON.parse(localStorage.getItem('qcm_global_mistakes')) || []; } 
+  catch(e) { return []; }
+}
+function addGlobalMistake(id) {
+  let mistakes = getGlobalMistakes();
+  if (!mistakes.includes(id)) {
+    mistakes.push(id);
+    localStorage.setItem('qcm_global_mistakes', JSON.stringify(mistakes));
+  }
+  updateMistakesBadge();
+}
+function removeGlobalMistake(id) {
+  let mistakes = getGlobalMistakes();
+  mistakes = mistakes.filter(m => m !== id);
+  localStorage.setItem('qcm_global_mistakes', JSON.stringify(mistakes));
+  updateMistakesBadge();
+}
+function updateMistakesBadge() {
+  if(el.globalMistakesCount) el.globalMistakesCount.textContent = getGlobalMistakes().length;
+}
+
+// --- AFFICHER LE HUB (ACCUEIL) ---
+function renderHub() {
+  el.hubGrid.innerHTML = '';
+  Object.keys(libraryData).forEach(key => {
+    const data = libraryData[key];
+    const card = document.createElement('div');
+    card.className = 'hub-card';
+    card.innerHTML = `
+      <div class="hub-icon">${data.icon}</div>
+      <div class="hub-title">${data.title}</div>
+      <div class="hub-meta">${data.db.length} questions</div>
+    `;
+    card.addEventListener('click', () => {
+      selectCourse(key, data);
+    });
+    el.hubGrid.appendChild(card);
+  });
+  updateMistakesBadge();
+}
+
+function selectCourse(key, dataObj) {
+  clearInterval(qTimerId);
+  mode = "full";
+  currentDBKey = 'qcm_app_' + key;
+  questionsDB = dataObj.db;
+  el.dashCourseTitle.textContent = dataObj.icon + " " + dataObj.title;
+  loadStats();
+  showScreen('dashboardScreen');
+}
+
+function showWelcome() {
+  clearInterval(qTimerId);
+  mode = "full";
+  el.appSidebar.classList.remove('active');
+  showScreen('welcomeScreen');
+}
+
+// 🌸 BANKAI — Senbonzakura Kageyoshi (Tempête Spirituelle)
+function fireConfetti() {
+  const VIDEO_PATH = 'Bankai zz.mp4';
+  
+  // 1. Overlay assombri
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0);z-index:9990;pointer-events:all;transition:background 0.8s ease;cursor:pointer;`;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => { overlay.style.background = 'rgba(0,0,0,0.92)'; });
+  
+  // 2. Aura spirituelle (Reiatsu)
+  const aura = document.createElement('div');
+  aura.style.cssText = `position:fixed;top:0;left:0;width:100vw;height:100vh;box-shadow:inset 0 0 150px rgba(255, 100, 200, 0);z-index:9991;pointer-events:none;transition:box-shadow 2s ease;`;
+  document.body.appendChild(aura);
+
+  const videoEl = document.createElement('video');
+  videoEl.src = VIDEO_PATH;
+  videoEl.style.cssText = `position:fixed;top:0;left:0;width:100vw;height:100vh;object-fit:cover;z-index:9995;opacity:0;transition:opacity 0.7s ease;pointer-events:none;`;
+  videoEl.autoplay = true; videoEl.controls = false; videoEl.playsInline = true;
+  document.body.appendChild(videoEl);
+  
+  const titleEl = document.createElement('div');
+  titleEl.style.cssText = `position:fixed;top:5%;left:50%;transform:translateX(-50%);z-index:9997;pointer-events:none;text-align:center;opacity:0;transition:opacity 1s ease 0.5s;`;
+  titleEl.innerHTML = `<div style="color:#fce4ec;font-size:2.5rem;font-weight:bold;font-family:Georgia,serif;letter-spacing:8px;text-shadow:0 0 30px #ff4081,0 0 60px #f50057,0 0 100px #c51162;">千本桜景嵐</div><div style="color:#f8bbd0;font-size:1.1rem;margin-top:6px;font-style:italic;letter-spacing:4px;font-family:Georgia,serif;text-shadow:0 0 15px #f50057;">Senbonzakura Kageyoshi</div>`;
+  document.body.appendChild(titleEl);
+  
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '✕';
+  closeBtn.style.cssText = `position:fixed;top:18px;right:22px;z-index:9999;background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.4);color:white;font-size:1.2rem;width:40px;height:40px;border-radius:50%;cursor:pointer;transition:all 0.3s ease;backdrop-filter:blur(8px);`;
+  closeBtn.onmouseover = () => { closeBtn.style.background = 'rgba(255,255,255,0.3)'; closeBtn.style.boxShadow = '0 0 15px rgba(255,100,200,0.8)'; };
+  closeBtn.onmouseout  = () => { closeBtn.style.background = 'rgba(255,255,255,0.15)'; closeBtn.style.boxShadow = 'none'; };
+  document.body.appendChild(closeBtn);
+  
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = `position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9996;opacity:0;transition:opacity 1.5s ease;`;
+  document.body.appendChild(canvas);
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  const ctx = canvas.getContext('2d');
+  
+  const petals = [];
+  let animId, addId, animRunning = true;
+  let globalTime = 0;
+
+  // Générateur 3D avec Profondeur (Parallax) améliorée
+  function spawnPetal(burst) { 
+    const depth = Math.random(); // 0 = lointain (petit/lent), 1 = proche (grand/rapide)
+    return { 
+      x: Math.random() * canvas.width, 
+      y: burst ? Math.random() * canvas.height : -80, 
+      z: depth * 0.8 + 0.2, 
+      vx: (Math.random() - 0.5) * 8, // Vitesse latérale de base plus forte
+      vy: (Math.random() * 4 + 2) * (depth + 0.5), // Les pétales proches tombent beaucoup plus vite
+      size: (Math.random() * 12 + 8) * (depth + 0.3), // Taille dramatiquement variable
+      spinX: Math.random() * Math.PI * 2,
+      spinY: Math.random() * Math.PI * 2,
+      spinZ: Math.random() * Math.PI * 2,
+      spinSpeedX: (Math.random() - 0.5) * 0.15,
+      spinSpeedY: (Math.random() - 0.5) * 0.15,
+      spinSpeedZ: (Math.random() - 0.5) * 0.15,
+      colorStep: Math.random(), 
+      alpha: depth * 0.6 + 0.3 // Plus opaque si c'est au premier plan
+    }; 
+  }
+
+  function drawPetal(p, currentWind) { 
+    ctx.save(); 
+    ctx.translate(p.x, p.y); 
+    
+    // Effet de flou de mouvement (Motion Blur) : on étire le pétale en fonction de sa vitesse totale
+    const speed = Math.sqrt(Math.pow(p.vx + currentWind, 2) + Math.pow(p.vy, 2));
+    const stretch = Math.max(1, speed * 0.12); 
+    
+    ctx.scale(p.z, p.z * stretch); // On étire selon la chute
+    
+    const cosY = Math.cos(p.spinY);
+    const sinX = Math.sin(p.spinX);
+    ctx.transform(cosY, sinX * 0.5, 0, Math.cos(p.spinX), 0, 0);
+    ctx.rotate(p.spinZ);
+    
+    ctx.globalAlpha = p.alpha; 
+    
+    ctx.beginPath();
+    ctx.moveTo(0, p.size);
+    ctx.bezierCurveTo(-p.size*0.8, p.size*0.3, -p.size*0.6, -p.size*0.8, 0, -p.size*0.5);
+    ctx.bezierCurveTo(p.size*0.6, -p.size*0.8, p.size*0.8, p.size*0.3, 0, p.size);
+    ctx.bezierCurveTo(p.size*0.1, p.size*0.8, -p.size*0.1, p.size*0.8, 0, p.size);
+    
+    const grad = ctx.createLinearGradient(0, -p.size, 0, p.size);
+    grad.addColorStop(0, `hsla(340, 100%, ${75 + p.colorStep * 15}%, 1)`);
+    grad.addColorStop(1, `hsla(330, 90%, ${85 + p.colorStep * 10}%, 0.85)`);
+    ctx.fillStyle = grad;
+    
+    ctx.shadowColor = 'rgba(255, 105, 180, 0.6)';
+    ctx.shadowBlur = 8 * p.z; // Le glow est plus fort au premier plan
+    ctx.fill(); 
+    ctx.restore(); 
+  }
+
+  function loopPetals() { 
+    if(!animRunning) return; 
+    ctx.clearRect(0,0,canvas.width,canvas.height); 
+    
+    globalTime += 0.015;
+    // Vent beaucoup plus violent et dynamique (vagues de vent)
+    const wind = Math.sin(globalTime * 2.5) * 8 + Math.cos(globalTime * 1.2) * 5 + 3; 
+    
+    // Faire pulser l'aura spirituelle avec le vent
+    aura.style.boxShadow = `inset 0 0 ${100 + Math.abs(wind) * 15}px rgba(255, 50, 150, ${0.1 + Math.abs(wind)*0.02})`;
+
+    petals.forEach(p => { 
+      // La force du vent impacte plus les pétales légers/lointains
+      p.x += (p.vx + wind * (1.5 - p.z)) * p.z; 
+      p.y += p.vy; 
+      p.spinX += p.spinSpeedX;
+      p.spinY += p.spinSpeedY;
+      p.spinZ += p.spinSpeedZ;
+      
+      // Reset plus large pour éviter que les pétales poppent visiblement
+      if(p.y > canvas.height + 100 || p.x < -150 || p.x > canvas.width + 150) { 
+        Object.assign(p, spawnPetal(false)); 
+        if (wind > 0 && p.x > canvas.width + 50) p.x = -100; // Si le vent pousse à droite, respawn à gauche
+        if (wind < 0 && p.x < -50) p.x = canvas.width + 100; // Inversement
+      } 
+      drawPetal(p, wind); 
+    }); 
+    animId = requestAnimationFrame(loopPetals); 
+  }
+
+  function closeBankai() { 
+    animRunning = false; clearInterval(addId); cancelAnimationFrame(animId); videoEl.pause(); 
+    [overlay, aura, videoEl, titleEl, closeBtn, canvas].forEach(e => { e.style.transition = 'opacity 0.6s ease'; e.style.opacity = '0'; }); 
+    setTimeout(() => { [overlay, aura, videoEl, titleEl, closeBtn, canvas].forEach(e => { try{e.remove();}catch(err){} }); }, 700); 
+  }
+
+  closeBtn.addEventListener('click', closeBankai); 
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeBankai(); });
+  
+  videoEl.addEventListener('play', () => { 
+    videoEl.style.opacity = '1'; 
+    titleEl.style.opacity = '1'; 
+  }, { once: true });
+
+  // Explosion exactement à 7.5s
+  videoEl.addEventListener('timeupdate', function checkTime() {
+    if (videoEl.currentTime >= 7.5) {
+      videoEl.removeEventListener('timeupdate', checkTime); 
+      if(!animRunning) return;
+      
+      canvas.style.opacity = '1'; 
+      // Burst énorme (700 pétales d'un coup)
+      for(let i=0; i<700; i++) petals.push(spawnPetal(true)); 
+      
+      // Ajout en continu jusqu'à 1500 pétales max (le double d'avant)
+      addId = setInterval(() => { 
+        if(petals.length < 1500) for(let i=0; i<40; i++) petals.push(spawnPetal(false)); 
+      }, 150); 
+      
+      loopPetals();
+    }
+  });
+
+  videoEl.addEventListener('error', () => { 
+    titleEl.style.opacity = '1'; 
+    titleEl.innerHTML += `<div style="color:#ff8080;font-size:0.85rem;margin-top:20px;background:rgba(0,0,0,0.5);padding:10px 18px;border-radius:8px;">⚠️ Vidéo introuvable.</div>`; 
+    canvas.style.opacity = '1';
+    for(let i=0; i<500; i++) petals.push(spawnPetal(true)); 
+    addId = setInterval(() => { if(petals.length < 1200) for(let i=0; i<30; i++) petals.push(spawnPetal(false)); }, 200); 
+    loopPetals(); 
+  }, { once: true });
+  
+  videoEl.addEventListener('ended', () => { setTimeout(closeBankai, 1500); });
+}
+
+// --- UTILITAIRES ---
+function shuffleArray(array) { for (let i = array.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [array[i], array[j]] = [array[j], array[i]]; } }
+
+function loadStats() {
+  try {
+    const data = JSON.parse(localStorage.getItem(currentDBKey)) || { games: 0, sumScore: 0, lastNote: null, history: [] };
+    el.statGames.textContent = data.games;
+    if (data.games > 0) { el.statAvg.textContent = `${((data.sumScore / data.games) * 20).toFixed(1).replace('.', ',')}/20`; el.statLast.textContent = `${(data.lastNote * 20).toFixed(1).replace('.', ',')}/20`; }
+    else { el.statAvg.textContent = "--/20"; el.statLast.textContent = "--/20"; }
+
+    // Rendu de l'historique
+    if(data.history && data.history.length > 0) {
+      el.historySection.style.display = 'block';
+      el.historyList.innerHTML = data.history.map(h => `
+        <div class="history-item">
+          <span class="h-date">📅 ${h.date}</span>
+          <span class="h-score">🎯 ${h.score}/20</span>
+          <span class="h-time">⏱️ ${h.time}</span>
+        </div>
+      `).join('');
+    } else {
+      el.historySection.style.display = 'none';
+      el.historyList.innerHTML = '';
+    }
+  } catch(e) { 
+    el.statAvg.textContent = "--/20"; el.statLast.textContent = "--/20"; 
+    if(el.historySection) el.historySection.style.display = 'none';
+  }
+}
+
+function saveStat(noteSur1, totalSecs) {
+  try {
+    const data = JSON.parse(localStorage.getItem(currentDBKey)) || { games: 0, sumScore: 0, lastNote: null, history: [] };
+    data.games += 1; data.sumScore += noteSur1; data.lastNote = noteSur1; 
+    if(!data.history) data.history = [];
+    const d = new Date();
+    data.history.unshift({
+        date: d.toLocaleDateString('fr-FR') + ' à ' + d.toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'}),
+        score: (noteSur1 * 20).toFixed(1).replace('.', ','),
+        time: totalSecs ? `${Math.floor(totalSecs/60)}m ${totalSecs%60}s` : '--'
+    });
+    if(data.history.length > 20) data.history.pop(); 
+    localStorage.setItem(currentDBKey, JSON.stringify(data)); 
+    loadStats();
+  } catch(e) {}
+}
+
+// --- NAVIGATION ---
+function showScreen(screenId) {
+  el.screens.forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+  
+  if (screenId === 'welcomeScreen' || screenId === 'dashboardScreen') { 
+    el.appSidebar.classList.remove('active'); // Masque le panneau
+    el.scoreBadge.style.display = 'none'; el.timerBadge.style.display = 'none'; el.progressBar.style.width = '0%'; clearInterval(qTimerId); 
+  } else { 
+    el.appSidebar.classList.add('active'); // Affiche le panneau
+    el.scoreBadge.style.display = 'flex'; el.timerBadge.style.display = 'flex'; 
+  }
+}
+
+if(el.backToHubBtn) el.backToHubBtn.addEventListener("click", showWelcome);
+if(el.resetStatsBtn) el.resetStatsBtn.addEventListener("click", () => { if(confirm("Effacer l'historique de ce cours ?")) { localStorage.removeItem(currentDBKey); loadStats(); }});
+
+
+
+// --- CHRONOMÈTRE ---
+function updateTimerUI() {
+  if (!timerEnabled) { el.timerText.textContent = "∞"; el.timerBadge.style.opacity = "0.5"; el.timerBadge.classList.remove("timer-danger"); return;}
+  if (mode === "exam") {
+    el.timerBadge.style.opacity = "1";
+    let m = Math.floor(examTimeLeft / 60); let s = examTimeLeft % 60;
+    el.timerText.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
+    if (examTimeLeft <= 60) el.timerBadge.classList.add("timer-danger"); else el.timerBadge.classList.remove("timer-danger");
+  } else {
+    el.timerBadge.style.opacity = "1";
+    el.timerText.textContent = qTimeLeft + "s";
+    if (qTimeLeft <= 15) el.timerBadge.classList.add("timer-danger"); else el.timerBadge.classList.remove("timer-danger");
+  }
+}
+
+if(el.timerBadge) el.timerBadge.addEventListener("click", () => { timerEnabled = !timerEnabled; updateTimerUI(); });
+
+function startTimer() {
+  clearInterval(qTimerId);
+  if (mode === "exam") examTimeLeft = 900; else qTimeLeft = 90;
+  updateTimerUI();
+  qTimerId = setInterval(() => {
+    if (locked || !timerEnabled) return;
+    if (mode === "exam") {
+      examTimeLeft--; updateTimerUI();
+      if (examTimeLeft <= 0) { clearInterval(qTimerId); finishExam(); }
+    } else {
+      qTimeLeft--; updateTimerUI();
+      if (qTimeLeft <= 0) validate(true, true);
+    }
+  }, 1000);
+}
+
+// --- LOGIQUE DU QUIZ & SCORING ---
+function evaluateQuestion(q, selectedOriginalIndices) {
+  let falsePositives = 0;
+  let falseNegatives = 0;
+
+  // Ce qu'il fallait cocher mais qui a été oublié (faux négatifs)
+  q.correct.forEach(cIdx => { if (!selectedOriginalIndices.includes(cIdx)) falseNegatives++; });
+  // Ce qui a été coché à tort (faux positifs)
+  selectedOriginalIndices.forEach(uIdx => { if (!q.correct.includes(uIdx)) falsePositives++; });
+
+  let mismatches = falsePositives + falseNegatives;
+
+  if (mismatches === 0) return 1;
+  if (mismatches === 1) return 0.5;
+  if (mismatches === 2) return 0.2;
+  return 0;
+}
+
+function startFull() { mode = "full"; runQuestions = JSON.parse(JSON.stringify(questionsDB)); if (el.orderSelect.value === 'random') shuffleArray(runQuestions); initQuiz(); }
+function startRetry() { mode = "retry"; runQuestions = wrongSnapshots.map(w => questionsDB.find(q => q.id === w.id)); if (el.orderSelect && el.orderSelect.value === 'random') shuffleArray(runQuestions); initQuiz(); }
+
+if(el.startGlobalRetryBtn) {
+  el.startGlobalRetryBtn.addEventListener('click', () => {
+    let mistakes = getGlobalMistakes();
+    if(mistakes.length === 0) { alert("Aucune erreur à réviser ! Tu maîtrises tout ! 🎉"); return; }
+    mode = "global_retry";
+    let allQuestions = [];
+    Object.values(libraryData).forEach(cat => allQuestions = allQuestions.concat(cat.db));
+    runQuestions = allQuestions.filter(q => mistakes.includes(q.id));
+    shuffleArray(runQuestions);
+    initQuiz();
+  });
+}
+
+if(el.startExamBtn) {
+  el.startExamBtn.addEventListener('click', () => {
+    mode = "exam";
+    let allQuestions = [];
+    Object.values(libraryData).forEach(cat => allQuestions = allQuestions.concat(cat.db));
+    let seenIds = JSON.parse(localStorage.getItem('qcm_exam_seen_ids')) || [];
+    let available = allQuestions.filter(q => !seenIds.includes(q.id));
+    
+    if (available.length < 15) {
+      let needed = 15 - available.length;
+      let firstBatch = [...available];
+      seenIds = []; // Reset historique
+      let remainingPool = allQuestions.filter(q => !firstBatch.find(fb => fb.id === q.id));
+      shuffleArray(remainingPool);
+      let secondBatch = remainingPool.slice(0, needed);
+      runQuestions = firstBatch.concat(secondBatch);
+      shuffleArray(runQuestions);
+      seenIds = secondBatch.map(q => q.id);
+    } else {
+      shuffleArray(available);
+      runQuestions = available.slice(0, 15);
+      seenIds = seenIds.concat(runQuestions.map(q => q.id));
+    }
+    localStorage.setItem('qcm_exam_seen_ids', JSON.stringify(seenIds));
+    initQuiz();
+  });
+}
+
+function initQuiz() { 
+  currentQIndex = 0; score = 0; wrongSnapshots = []; wrongIds = new Set(); 
+  el.liveTotal.textContent = runQuestions.length; sessionStartTime = Date.now(); 
+  userAnswers = new Array(runQuestions.length).fill(null).map(() => []);
+
+  showScreen('quizScreen'); 
+  
+  if(mode === "exam") {
+    el.scoreBadge.style.display = "none";
+  } else {
+    el.scoreBadge.style.display = "flex"; 
+  }
+
+  // Initialisation de la grille Tracker
+  el.quizSidebar.innerHTML = '';
+  runQuestions.forEach((_, i) => {
+    let dot = document.createElement('div');
+    dot.className = 'q-dot';
+    dot.textContent = i + 1;
+    dot.id = 'qdot-' + i;
+    dot.addEventListener('click', () => {
+      if(mode === 'exam') { currentQIndex = i; renderQuestion(); }
+    });
+    el.quizSidebar.appendChild(dot);
+  });
+
+  renderQuestion(); startTimer(); 
+}
+
+function updateProgress() { 
+  if(mode !== "exam") el.liveScore.textContent = parseFloat(score.toFixed(1)).toString().replace('.', ','); 
+  el.progressBar.style.width = `${(currentQIndex / runQuestions.length) * 100}%`; 
+}
+
+function updateExamTrackerDot(idx) {
+  if (mode !== 'exam') return;
+  let dot = document.getElementById('qdot-' + idx);
+  if (!dot) return;
+  if (userAnswers[idx] && userAnswers[idx].length > 0) {
+    dot.classList.add('answered');
+  } else {
+    dot.classList.remove('answered');
+  }
+}
+
+function renderQuestion() {
+  if (currentQIndex >= runQuestions.length) return mode === 'exam' ? finishExam() : showEndScreen();
+  locked = false; updateProgress(); const q = runQuestions[currentQIndex];
+  
+  // Update Tracker UI
+  document.querySelectorAll('.q-dot').forEach((dot, i) => {
+    dot.classList.remove('current');
+    if (i === currentQIndex && !dot.classList.contains('correct') && !dot.classList.contains('incorrect')) {
+      dot.classList.add('current');
+      dot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  });
+
+  if(mode === "exam") {
+    el.qSource.textContent = `Question ${currentQIndex + 1} / 15`;
+    el.qSource.classList.add("exam-mode");
+    el.hintText.textContent = "Examen Blanc : Navigue librement et termine quand tu es prêt.";
+    
+    el.skipBtn.style.display = 'none';
+    el.validateBtn.style.display = 'none';
+    el.nextBtn.style.display = 'none';
+    el.prevBtn.style.display = currentQIndex > 0 ? 'inline-flex' : 'none';
+    el.nextBtnExam.style.display = currentQIndex < runQuestions.length - 1 ? 'inline-flex' : 'none';
+    
+    // Vérifie si TOUTES les questions ont au moins une réponse cochée
+    let allAnswered = userAnswers.every(ans => ans && ans.length > 0);
+    el.finishExamBtn.style.display = allAnswered ? 'inline-flex' : 'none';
+  } else {
+    el.qSource.textContent = q.source;
+    el.qSource.classList.remove("exam-mode");
+    el.hintText.textContent = "Coche les réponses puis valide.";
+    
+    el.prevBtn.style.display = 'none';
+    el.nextBtnExam.style.display = 'none';
+    el.finishExamBtn.style.display = 'none';
+    el.validateBtn.style.display = 'inline-flex'; 
+    el.nextBtn.style.display = 'none'; 
+    el.skipBtn.style.display = 'inline-flex'; 
+    el.validateBtn.disabled = (userAnswers[currentQIndex].length === 0);
+  }
+  
+  el.qText.textContent = q.question; el.explanationBox.style.display = 'none';
+  el.optionsContainer.innerHTML = "";
+
+  // On crée un tableau mélangé uniquement si c'est la première fois, sinon on reprend celui en cache pour ne pas remélanger en naviguant
+  if(!q._shuffledOptions) {
+    let currentOptions = q.options.map((text, idx) => ({ text, isCorrect: q.correct.includes(idx), originalIdx: idx }));
+    shuffleArray(currentOptions); 
+    q._shuffledOptions = currentOptions;
+  }
+
+  const savedAnswers = userAnswers[currentQIndex] || [];
+
+  q._shuffledOptions.forEach((opt, uiIndex) => {
+    const lbl = document.createElement("label"); lbl.className = "option-label"; lbl.dataset.uiIndex = uiIndex;
+    lbl.innerHTML = `<div class="checkbox-box"></div><div class="option-text">${opt.text}</div>`;
+    
+    if (savedAnswers.includes(opt.originalIdx)) lbl.classList.add("selected");
+
+    el.optionsContainer.appendChild(lbl);
+    lbl.addEventListener("click", () => { 
+      if (locked && mode !== "exam") return; // En mode examen, on peut changer même si "locked" (bien qu'il n'y ait pas de lock)
+      lbl.classList.toggle("selected"); 
+      
+      // Update état en direct
+      if (lbl.classList.contains("selected")) {
+        if (!userAnswers[currentQIndex].includes(opt.originalIdx)) userAnswers[currentQIndex].push(opt.originalIdx);
+      } else {
+        userAnswers[currentQIndex] = userAnswers[currentQIndex].filter(idx => idx !== opt.originalIdx);
+      }
+
+      updateExamTrackerDot(currentQIndex);
+
+      if(mode !== "exam") {
+        el.validateBtn.disabled = (userAnswers[currentQIndex].length === 0); 
+      } else {
+        // Met à jour l'affichage du bouton "Terminer" en direct au moment du clic
+        let allAnswered = userAnswers.every(ans => ans && ans.length > 0);
+        el.finishExamBtn.style.display = allAnswered ? 'inline-flex' : 'none';
+      }
+    });
+  });
+  
+  if (mode !== "exam") { clearInterval(qTimerId); qTimeLeft = 90; updateTimerUI(); qTimerId = setInterval(() => { if (locked || !timerEnabled) return; qTimeLeft--; updateTimerUI(); if (qTimeLeft <= 0) validate(true, true); }, 1000); }
+}
+
+function validate(skipped = false, timeout = false) {
+  if (locked) return; locked = true; 
+  if (mode !== "exam") clearInterval(qTimerId); 
+  
+  const q = runQuestions[currentQIndex];
+  const labels = document.querySelectorAll('.option-label');
+  let userPicksText = [];
+  let selectedOriginalIndices = userAnswers[currentQIndex];
+
+  // Si on passe, on vide les réponses
+  if(skipped || timeout) {
+    selectedOriginalIndices = [];
+    userAnswers[currentQIndex] = [];
+  }
+  
+  labels.forEach((lbl) => {
+    const optObj = q._shuffledOptions[parseInt(lbl.dataset.uiIndex)]; 
+    if (optObj.isCorrect) lbl.classList.add("correct"); 
+    else if (lbl.classList.contains("selected")) lbl.classList.add("incorrect");
+    
+    if(selectedOriginalIndices.includes(optObj.originalIdx)) userPicksText.push(optObj.text);
+  });
+
+  let pts = evaluateQuestion(q, selectedOriginalIndices);
+  score += pts;
+
+  let currentDot = document.getElementById('qdot-' + currentQIndex);
+
+  if (pts === 1) { 
+    removeGlobalMistake(q.id);
+    if(currentDot) currentDot.className = 'q-dot correct';
+  } else { 
+    wrongSnapshots.push({ id: q.id, source: q.source, qText: q.question, expText: q.explanation, userPicks: userPicksText }); 
+    wrongIds.add(q.id); 
+    addGlobalMistake(q.id);
+    if(currentDot) currentDot.className = 'q-dot incorrect';
+  }
+
+  el.liveScore.textContent = parseFloat(score.toFixed(1)).toString().replace('.', ','); 
+  el.skipBtn.style.display = 'none'; el.validateBtn.style.display = 'none'; el.nextBtn.style.display = 'inline-flex';
+  el.explanationBox.style.display = 'block'; el.expText.textContent = q.explanation;
+
+  if (timeout) { el.explanationBox.style.borderLeftColor = "var(--danger)"; el.expStatus.style.color = "var(--danger)"; el.expStatus.textContent = "⏱️ Temps écoulé !"; el.hintText.textContent = "Sois plus rapide."; }
+  else if (pts === 1) { el.explanationBox.style.borderLeftColor = "var(--success)"; el.expStatus.style.color = "var(--success)"; el.expStatus.textContent = "✅ Correct !"; el.hintText.textContent = "Parfait (+1 pt)"; }
+  else if (pts > 0) { el.explanationBox.style.borderLeftColor = "var(--amber)"; el.expStatus.style.color = "var(--amber)"; el.expStatus.textContent = "⚠️ Partiellement correct"; el.hintText.textContent = `Quelques discordances (+${pts} pt).`; }
+  else { el.explanationBox.style.borderLeftColor = "var(--danger)"; el.expStatus.style.color = "var(--danger)"; el.expStatus.textContent = "❌ Incorrect"; el.hintText.textContent = "Erreur (+0 pt). Analyse la correction."; }
+  el.nextBtn.focus();
+}
+
+function finishExam() {
+  if(!confirm("Es-tu sûr de vouloir terminer l'examen maintenant ?")) return;
+  clearInterval(qTimerId);
+
+  score = 0;
+  wrongSnapshots = [];
+  wrongIds = new Set();
+
+  runQuestions.forEach((q, idx) => {
+    let selectedOriginalIndices = userAnswers[idx] || [];
+    let pts = evaluateQuestion(q, selectedOriginalIndices);
+    score += pts;
+
+    if (pts < 1) {
+      let userPicksText = selectedOriginalIndices.map(i => q.options[i]);
+      wrongSnapshots.push({ id: q.id, source: q.source, qText: q.question, expText: q.explanation, userPicks: userPicksText });
+      wrongIds.add(q.id);
+      addGlobalMistake(q.id);
+    } else {
+      removeGlobalMistake(q.id);
+    }
+  });
+
+  showEndScreen();
+}
+
+function showEndScreen() {
+  el.progressBar.style.width = '100%'; updateProgress(); clearInterval(qTimerId); el.timerBadge.style.display = 'none';
+  const totalSecs = Math.floor((Date.now() - sessionStartTime) / 1000); el.endTotalTime.textContent = `⏱️ Temps : ${Math.floor(totalSecs/60)}m ${totalSecs%60}s`;
+  
+  const maxScore = runQuestions.length;
+  const ratio = maxScore > 0 ? score / maxScore : 0; 
+  const noteSur20 = ratio * 20;
+
+  if (mode === 'full') saveStat(ratio, totalSecs); 
+  
+  if (mode === 'exam') { el.endTitle.textContent = "Fin de l'Examen !"; if (ratio >= 0.8) fireConfetti(); } 
+  else { el.endTitle.textContent = "Fin de la session !"; if (ratio >= 0.8) fireConfetti(); }
+
+  let displayedScore = parseFloat(score.toFixed(1)).toString().replace('.', ',');
+  let displayedNote = parseFloat(noteSur20.toFixed(1)).toString().replace('.', ',');
+  el.endSummary.textContent = `Ton score : ${displayedScore} / ${maxScore} (Soit ${displayedNote}/20)`;
+  
+  if (wrongSnapshots.length > 0) {
+    el.wrongBlock.style.display = 'block'; el.wrongList.innerHTML = ""; el.exportBtn.style.display = "inline-block";
+    wrongSnapshots.forEach(w => { 
+      let picksHtml = w.userPicks && w.userPicks.length > 0 ? `<div class="w-picks"><b>❌ Tes réponses :</b><br> ${w.userPicks.join('<br>')}</div>` : `<div class="w-picks"><b>❌ Tes réponses :</b> Aucune (Question passée)</div>`;
+      el.wrongList.innerHTML += `<div class="wrong-item">
+        <h5>${w.source}</h5>
+        <div class="w-q">${w.qText}</div>
+        ${picksHtml}
+        <div class="w-exp">✅ <b>Correction :</b><br/>${w.expText}</div>
+      </div>`; 
+    });
+    if(mode !== "exam" && mode !== "global_retry") el.retryWrongBtn.style.display = 'inline-flex'; else el.retryWrongBtn.style.display = 'none';
+  } else { el.wrongBlock.style.display = 'none'; el.retryWrongBtn.style.display = 'none'; el.exportBtn.style.display = "none"; }
+  showScreen('endScreen');
+}
+
+// Boutons
+if(el.backHomeEndBtn) el.backHomeEndBtn.addEventListener("click", showWelcome);
+if(el.startFullBtn) el.startFullBtn.addEventListener('click', startFull); 
+if(el.restartBtn) el.restartBtn.addEventListener('click', () => { 
+  if(mode==="exam") el.startExamBtn.click(); 
+  else if (mode==="global_retry") el.startGlobalRetryBtn.click();
+  else startFull(); 
+}); 
+if(el.retryWrongBtn) el.retryWrongBtn.addEventListener('click', startRetry);
+
+if(el.validateBtn) el.validateBtn.addEventListener('click', () => validate(false, false)); 
+if(el.skipBtn) el.skipBtn.addEventListener('click', () => validate(true, false)); 
+if(el.nextBtn) el.nextBtn.addEventListener('click', () => { currentQIndex++; renderQuestion(); });
+
+// Mode Examen Navigation
+if(el.prevBtn) el.prevBtn.addEventListener('click', () => { if(currentQIndex > 0) { currentQIndex--; renderQuestion(); } });
+if(el.nextBtnExam) el.nextBtnExam.addEventListener('click', () => { if(currentQIndex < runQuestions.length - 1) { currentQIndex++; renderQuestion(); } });
+if(el.finishExamBtn) el.finishExamBtn.addEventListener('click', finishExam);
+
+// Quitter Quiz depuis la Sidebar
+if(el.quitQuizBtn) el.quitQuizBtn.addEventListener('click', () => {
+   if(confirm("Veux-tu vraiment quitter le QCM en cours ?")) showWelcome();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (el.quizScreen.classList.contains('active')) {
+    if (e.key === "Enter") { 
+      e.preventDefault(); 
+      if (mode === 'exam') return; // En mode exam, on désactive Entrée pour éviter de valider involontairement
+      if (!locked && !el.validateBtn.disabled) validate(false, false); 
+      else if (locked) { currentQIndex++; renderQuestion(); } 
+    }
+    if (!locked && ['1','2','3','4','5'].includes(e.key)) { const lbl = document.querySelectorAll('.option-label')[parseInt(e.key)-1]; if(lbl) lbl.click(); }
+  }
+});
+
+if(el.exportBtn) el.exportBtn.addEventListener('click', () => {
+  let content = "--- MES ERREURS : QCM SANTÉ PUBLIQUE ---\n\n";
+  wrongSnapshots.forEach((w, i) => { content += `${i+1}. ${w.source}\nQ: ${w.qText}\nCorrection:\n${w.expText}\n\n`; });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([content], { type: "text/plain;charset=utf-8" })); a.download = "Erreurs_SantePublique.txt"; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+});
+
+// Import JSON
+if(el.importJsonBtn) el.importJsonBtn.addEventListener('click', () => el.jsonUpload.click());
+if(el.jsonUpload) el.jsonUpload.addEventListener('change', (e) => {
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if(Array.isArray(data) && data.length > 0 && data[0].question) {
+        let cleanName = file.name.replace('.json', '');
+        libraryData['custom_' + cleanName] = { icon: "📁", title: cleanName, db: data };
+        renderHub(); alert(`QCM importé avec succès ! (${data.length} questions)`);
+      } else alert("Format JSON non reconnu.");
+    } catch(err) { alert("Erreur de lecture du JSON."); }
+  };
+  reader.readAsText(file);
+});
+
+// Thèmes init
+try {
+  const sm = localStorage.getItem('qcm_theme_mode'); if(sm==="dark") document.body.setAttribute("data-theme", "dark");
+  const sc = localStorage.getItem('qcm_theme_color'); if(sc && colors.includes(sc)) { currentColorIndex = colors.indexOf(sc); document.body.setAttribute('data-color', sc); }
+} catch(e) {}
+
+if(el.themeBtn) el.themeBtn.addEventListener("click", () => { const isDark = document.body.getAttribute("data-theme") === "dark"; document.body.setAttribute("data-theme", isDark ? "light" : "dark"); try{localStorage.setItem('qcm_theme_mode', isDark ? "light" : "dark");}catch(e){} });
+if(el.colorBtn) el.colorBtn.addEventListener("click", () => { currentColorIndex = (currentColorIndex + 1) % colors.length; document.body.setAttribute('data-color', colors[currentColorIndex]); try{localStorage.setItem('qcm_theme_color', colors[currentColorIndex]);}catch(e){} });
+
+// INIT
+renderHub();
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js');
+  });
+}
+</script>
+</body>
+</html>
